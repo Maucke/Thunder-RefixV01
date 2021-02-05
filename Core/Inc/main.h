@@ -271,7 +271,12 @@ extern u16 DATA_THEME;
 extern u16 DisSwRun;
 extern u16 SleepCount;
 extern u16 MenuCount;
-
+typedef enum
+{
+ online,offline
+}STA;
+extern STA systemstatus;
+extern u16 offlinecount;
 #if INTERFACE_4WIRE_SPI
   #if INTERFACE_3WIRE_SPI
     #error "SPI Setting Error !!"

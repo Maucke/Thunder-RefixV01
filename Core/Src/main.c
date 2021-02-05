@@ -214,7 +214,7 @@ void MainSysRun()
 	{
 		switch(Current_Mode)
 		{
-//			case MODE_GAME:ui.SUIDataPrss();break;
+			case MODE_GAME:ui.SUIDataPrss();break;
 //			case MODE_NORMAL:ui.NUIDataPrss();break;
 			case MODE_MUSIC:ui.MUIDataPrss();break;
 			case MODE_DATE:switch(TimeTHEME) 
@@ -224,7 +224,7 @@ void MainSysRun()
 				case 2:ui.T2UIDataPrss();break;
 				default:Device_Cmd.commandtimetheme=0;break;
 			}break;
-//			case MODE_SHOW:ui.HUIDataPrss();break;
+			case MODE_SHOW:ui.HUIDataPrss();break;
 			case MODE_OFFLINE:break;
 //			default:ui.SUIDataPrss();break;
 		}
@@ -238,9 +238,9 @@ void MainSysRun()
 		{
 			switch(Current_Mode)
 			{
-//				case MODE_GAME:ui.SUI_Out();;break;
+				case MODE_GAME:ui.SUI_Out();;break;
 //				case MODE_NORMAL:ui.NUI_Out();break;
-				case MODE_MUSIC:ui.MUI_Out();break;
+				case MODE_MUSIC:FFT_Stop();ui.MUI_Out();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
 					case 0:ui.TUI_Out();break;
@@ -248,7 +248,7 @@ void MainSysRun()
 					case 2:ui.T2UI_Out();break;
 					default:Device_Cmd.commandtimetheme=0;break;
 				}break;
-//				case MODE_SHOW:ui.HUI_Out();break;
+				case MODE_SHOW:ui.HUI_Out();break;
 				case MODE_OFFLINE:break;
 //				default:ui.SUI_Out();break;
 			}
@@ -260,9 +260,9 @@ void MainSysRun()
 			TimeTHEME=Device_Cmd.commandtimetheme;
 			switch(Current_Mode)
 			{
-//				case MODE_GAME:ui.SUI_In();;break;
+				case MODE_GAME:ui.SUI_In();;break;
 //				case MODE_NORMAL:ui.NUI_In();break;
-				case MODE_MUSIC:ui.MUI_In();break;
+				case MODE_MUSIC:FFT_Start();ui.MUI_In();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
 					case 0:ui.TUI_In();break;
@@ -270,7 +270,7 @@ void MainSysRun()
 					case 2:ui.T2UI_In();break;
 					default:Device_Cmd.commandtimetheme=0;break;
 				}break;
-//				case MODE_SHOW:ui.HUI_In();break;
+				case MODE_SHOW:ui.HUI_In();break;
 				case MODE_OFFLINE:break;
 //				default:ui.SUI_In();break;
 			}
@@ -351,6 +351,7 @@ void module_pwr_enter_sleep_mode(void)
 	HAL_TIM_Base_Stop_IT(&htim9);
 	HAL_ADC_Stop(&hadc1);
 	HAL_SPI_DMAStop(&hspi1);
+	Tranfcmd();
 	
     /*进STOP模式*/
   __HAL_RCC_PWR_CLK_DISABLE();
@@ -491,7 +492,7 @@ int main(void)
   oled.Device_Init();
 	Recvcmd();
 	motion.OLED_AllMotion_Init();
-	FFT_Start();
+	
 //	Time_Handle();
 //	MPU_Init();
 //	mpu_dmp_init();
@@ -525,32 +526,37 @@ int main(void)
 //		HAL_ADC_Start(&hadc1);
 //		HAL_ADC_PollForConversion(&hadc1, 50);
 //		printf("ADC:%X\r\n",HAL_ADC_GetValue(&hadc1));
+//		while(!Flag_Refrash)__ASM("NOP");
 		
-		oled.Clear_Screen();
-		motion.OLED_CustormMotion(Device_Cmd.commandmotion);
-		KeyProcess();
-		fps++;
-		if(showfpsflag)
-			oled.OLED_SHFAny(0,0,fpschar,19,0xffff);
-		switch(Current_Mode)
 		{
-//			case MODE_GAME:ui.SUIMainShow();break;
-//			case MODE_NORMAL:ui.NUIMainShow();break;
-			case MODE_MUSIC:ui.MUIMainShow();break;
-			case MODE_DATE:switch(TimeTHEME) 
+			Flag_Refrash=False;
+			oled.Clear_Screen();
+			motion.OLED_CustormMotion(Device_Cmd.commandmotion);
+			KeyProcess();
+			fps++;
+			if(showfpsflag)
+				oled.OLED_SHFAny(0,0,fpschar,19,0xffff);
+			switch(Current_Mode)
 			{
-				case 0:ui.TUIMainShow();break;
-				case 1:ui.T1UIMainShow();break;
-				case 2:ui.T2UIMainShow();break;
-				default:Device_Cmd.commandtimetheme=0;break;
-//				case 2:ui.T2UIMainShow();break;
+				case MODE_GAME:ui.SUIMainShow();break;
+	//			case MODE_NORMAL:ui.NUIMainShow();break;
+				case MODE_MUSIC:ui.MUIMainShow();break;
+				case MODE_DATE:switch(TimeTHEME) 
+				{
+					case 0:ui.TUIMainShow();break;
+					case 1:ui.T1UIMainShow();break;
+					case 2:ui.T2UIMainShow();break;
+					default:Device_Cmd.commandtimetheme=0;break;
+	//				case 2:ui.T2UIMainShow();break;
+				}
+				break;
+				case MODE_SHOW:ui.HUIMainShow();break;
+				case MODE_OFFLINE:break;
+	//			default:ui.SUIMainShow();break;
 			}
-			break;
-//			case MODE_SHOW:ui.HUIMainShow();break;
-			case MODE_OFFLINE:break;
-//			default:ui.SUIMainShow();break;
+			oled.Refrash_Screen();
 		}
-		oled.Refrash_Screen();
+		HAL_Delay(5);
   }
   /* USER CODE END 3 */
 }
@@ -600,8 +606,9 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-uint8_t prt = 1;		
-
+uint8_t prt = 2;		
+STA systemstatus = offline;
+u16 offlinecount = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	static u16 TimeRun = 0;
@@ -709,9 +716,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			key2upCnt = 0;
 			key2UpFlag = False;
 		}
+			DampAutoPos(0);
+			MainSysRun();
 		
-		DampAutoPos(0);
-		MainSysRun();
 	}
 	if (htim->Instance == htim5.Instance)
 	{
@@ -722,6 +729,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	if (htim->Instance == htim9.Instance)
 	{
+		if(offlinecount<3)
+		{
+			offlinecount++;
+		}
+		else if(systemstatus==online)
+		{
+			systemstatus=offline;
+			if(Display_Mode!=MODE_DATE&&Display_Mode!=MODE_MUSIC)
+				Display_Mode=MODE_DATE;
+		}
 		Time_Handle();
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
@@ -802,15 +819,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 //	HAL_ADC_Stop_DMA(&hadc1);	//停止ADC的DMA传输
 	FFT_Stop();
 	FFT_Pro();	
-	for(i=0;i<200;i++)
+	if(systemstatus==offline)
 	{
-		if(lBufMagArray[i]/prt>20)
-			Device_Msg.fft[i] = lBufMagArray[i]/prt;
-		else
-			Device_Msg.fft[i] = lBufMagArray[i]/prt/4;
+		for(i=0;i<200;i++)
+		{
+			if(lBufMagArray[i]/prt>20)
+				Device_Msg.fft[i] = lBufMagArray[i]/prt;
+			else
+				Device_Msg.fft[i] = lBufMagArray[i]/prt/4;
+		}
+		Device_Msg.leftvol=Device_Msg.fft[1];
 	}
-	Device_Msg.leftvol=Device_Msg.fft[1];
-	FFT_Start();
+  FFT_Start();
 }
 
 /* USER CODE END 4 */

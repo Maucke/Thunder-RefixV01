@@ -69,5 +69,17 @@ void SetChannel(uint8_t index,uint8_t able);
 
 //#define DIM 65
 //#define UNUSE 66
+#define SSLF  60
+#define SSRT  61
+#define SSMLF 62
+#define SSMRT 63
+#define SSLLF 64
+#define SSLRT 65
+
+#define SSUP  66
+#define SSDN  67
+#define SSRD  68
+
+#define STSOK  69
 
 #endif

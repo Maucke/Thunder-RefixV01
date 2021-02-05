@@ -277,6 +277,8 @@ void USART1_IRQHandler(void)
 //		CptOnline = True;
 //		if(Flag_Reception)
 //		{
+		offlinecount=0;
+		systemstatus=online;
 			AnalysisComputermsg(Uart_Recv1_Buf);
 			AnalysisFFT(Uart_Recv1_Buf);
 			AnalysisCommand(Uart_Recv1_Buf);

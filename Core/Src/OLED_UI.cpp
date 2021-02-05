@@ -5,6 +5,7 @@
 #include "ds3231.h"
 #include "usart.h"
 #include "math.h"
+#include "image.h"
 
 #ifdef __cplusplus
 extern "C"  {
@@ -362,7 +363,7 @@ void OLED_UI::HUI_In(){
 	int i;
 	for(i=50;i<60;i++)
 		SetCurrent(i,0);
-	SetTarget(50,128);
+	SetTarget(50,160+16);
 }
 void OLED_UI::HUI_Out(){
 	int i;
@@ -372,11 +373,101 @@ void OLED_UI::HUI_Out(){
 void OLED_UI::HUIDataPrss(){
 }
 OLED_STATUS OLED_UI::HUIMainShow(){
-//	oled.Display_bmp(0-128+pit[50].current,-16,128,128,Logo_amd);
-//	oled.Display_bmp(128+128-pit[50].current,-16,128,128,Logo_msi);
+	
+	oled.Display_bmp(0-160+pit[50].current,0,128,128,Logo_amd);
 	
 	return OLED_IDLE;
 }
+
+
+void OLED_UI::SUI_In(){
+	int i;
+	for(i=60;i<70;i++)
+		SetCurrent(i,0);
+	SetTarget(SSLF,8) ;
+	SetTarget(SSRT,66) ;
+	SetTarget(SSMLF,8);
+	SetTarget(SSMRT,98);
+	SetTarget(SSLLF,40);
+	SetTarget(SSLRT,88);
+	SetTarget(SSUP,0);
+	SetTarget(SSDN,112-7);
+	SetTarget(SSRD,5);
+	
+	SetCurrent(SSLF,8-80) ;
+	SetCurrent(SSRT,66+80) ;
+	SetCurrent(SSMLF,8-120);
+	SetCurrent(SSMRT,98+120);
+	SetCurrent(SSLLF,40-20);
+	SetCurrent(SSLRT,88+20);
+	SetCurrent(SSUP,0-20);
+	SetCurrent(SSDN,112-7+40);
+	SetCurrent(SSRD,5-5);
+}
+void OLED_UI::SUI_Out(){
+	int i;
+	for(i=60;i<70;i++)
+		SetTarget(i,0);
+	SetTarget(SSLF,8-80) ;
+	SetTarget(SSRT,66+80) ;
+	SetTarget(SSMLF,8-88);
+	SetTarget(SSMRT,98+88);
+	SetTarget(SSLLF,40-20);
+	SetTarget(SSLRT,88+20);
+	SetTarget(SSUP,0-20);
+	SetTarget(SSDN,112-7+40);
+	SetTarget(SSRD,5-5);
+}
+void OLED_UI::SUIDataPrss(){
+	
+}
+
+#define DT 16
+extern OLED_Animation motion;
+OLED_STATUS OLED_UI::SUIMainShow(){
+	static int i,roun=0;
+	static char tempstr[100];
+	roun++;
+	oled.Display_bbmp(DT+21,46,86,43,GeForce_B_Back,color_min);
+	oled.Display_bbmp(DT+6+5,105,23,13,shadowleft,color_min);
+	oled.Display_bbmp(DT+99-5,105,23,13,shadowright,color_min);
+
+	motion.OLED_CustormMotion(Device_Cmd.commandmotion);
+	oled.Display_hbmp(DT+pit[SSLF].current,22,54,9,userleft,color_now);
+	oled.Display_hbmp(DT+pit[SSRT].current,22,54,9,userright,color_now);
+	oled.Display_hbmp(DT+10,pit[SSDN].current,108,21,userbottom,color_now);
+	
+	
+	oled.Display_hbmp(DT+35,pit[SSDN].current+3,58,3,usermgndbar,0xFFFF);
+	oled.Display_hbmp(DT+pit[SSMLF].current,47,21,37,usermleft,color_half);
+	oled.Display_hbmp(DT+pit[SSMRT].current,47,21,37,usermright,color_half);
+	for(i=0;i<9;i++)
+			oled.Draw_Pixel(DT+9+28+4+8+i*5,pit[SSUP].current+8,color_min);
+	
+	oled.Draw_Line(DT+0,0,DT+pit[SSRD].current,pit[SSRD].current,color_now);
+	oled.Draw_Line(DT+127,0,DT+127-pit[SSRD].current,pit[SSRD].current,color_now);
+	oled.Draw_Line(DT+pit[SSRD].current,127-pit[SSRD].current,DT+0,127,color_now);
+	oled.Draw_Line(DT+127-pit[SSRD].current,127-pit[SSRD].current,DT+127,127,color_now);
+	
+	oled.Display_hbmp(DT+9-5+pit[SSRD].current,pit[SSRD].current,28,10,GeForce_LOAD,color_now);
+	oled.Display_hbmp(DT+101+5-pit[SSRD].current,pit[SSRD].current,21,10,GeForce_SYS,color_now);
+	oled.Display_hbmp(DT+27+1,33,74,10,GeForce_TEMP,color_now);
+	oled.Display_hbmp(DT+48,88,33,13,GeForce_CENT,color_now);
+	oled.Draw_Line(DT+20,96-2,DT+pit[SSLLF].current,96-2,0xFFFF);
+	oled.Draw_Line(DT+pit[SSLRT].current,96-2,DT+108,96-2,0xFFFF);
+	oled.Draw_Line(DT+27,33+10,DT+27+73,33+10,color_min);
+	sprintf(tempstr,"%02d",Device_Msg.cputemp/10);
+	oled.OLED_SHFAny(DT+38,48,tempstr,25,0xFFFF);
+	sprintf(tempstr,"%03d",Device_Msg.cpuload/10);
+	oled.OLED_SHFAny(DT+29-8+pit[SSLF].current,15,tempstr,10,0xFFFF);
+	sprintf(tempstr,"%03d",Device_Msg.gputemp/10);
+	oled.OLED_SHFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
+	return OLED_IDLE;
+}
+
+
+
+
 
 #ifdef __cplusplus
 }

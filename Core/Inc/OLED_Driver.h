@@ -92,7 +92,9 @@ extern "C" {
       
       void Set_Color(uint16_t color);
       void Set_FillColor(uint16_t color);
-    
+			void Display_bbmp(int x,int y,int w,int h,const uint8_t *ch);
+			void Display_bbmp(int x,int y,int w,int h,const uint8_t *ch,uint16_t color);
+		
 			void Display_bmp(int x,int y,int w,int h,const uint8_t *ch);
       void Invert(bool v);
       void Draw_Pixel(long x, long y);
