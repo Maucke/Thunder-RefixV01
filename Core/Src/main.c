@@ -69,7 +69,7 @@ uint8_t SystemActive = False;
 u8 datatemp[256] = {};
 u16 RandomX=30,RandomY=30;
 
-u16 Display_Mode = MODE_DATE;
+u16 Display_Mode = MODE_CHROME;
 u16 Current_Mode = MODE_OFFLINE;
 	
 OLED_GFX oled = OLED_GFX();
@@ -225,6 +225,7 @@ void MainSysRun()
 				default:Device_Cmd.commandtimetheme=0;break;
 			}break;
 			case MODE_SHOW:ui.HUIDataPrss();break;
+			case MODE_CHROME:ui.GAMEUIDataPrss();break;
 			case MODE_OFFLINE:break;
 //			default:ui.SUIDataPrss();break;
 		}
@@ -249,6 +250,7 @@ void MainSysRun()
 					default:Device_Cmd.commandtimetheme=0;break;
 				}break;
 				case MODE_SHOW:ui.HUI_Out();break;
+				case MODE_CHROME:ui.GAMEUI_Out();break;
 				case MODE_OFFLINE:break;
 //				default:ui.SUI_Out();break;
 			}
@@ -271,6 +273,7 @@ void MainSysRun()
 					default:Device_Cmd.commandtimetheme=0;break;
 				}break;
 				case MODE_SHOW:ui.HUI_In();break;
+				case MODE_CHROME:ui.GAMEUI_In();break;
 				case MODE_OFFLINE:break;
 //				default:ui.SUI_In();break;
 			}
@@ -326,6 +329,7 @@ u8 sleepflag=0;
 void module_pwr_enter_sleep_mode(void)
 {
 	sleepflag=1;
+  oled.SCR_reg(0x06, 0x00);//shutdown screen
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 	
   GPIO_InitStruct.Pin = SYSLED_Pin;
@@ -389,8 +393,10 @@ int key2upCnt = 0;
 
 void KeyProcess(void)
 {
+//	return;
 	if(short_key1_flag)
 	{
+		if(Current_Mode==MODE_CHROME) return;
 		short_key1_flag=0;
 		if(Display_Mode==MODE_MUSIC)
 		{
@@ -414,14 +420,17 @@ void KeyProcess(void)
 	else if(key1_long_down)
 	{
 		if(Display_Mode==MODE_MUSIC)
+			Display_Mode=MODE_CHROME;
+		else if(Display_Mode==MODE_CHROME)
 			Display_Mode=MODE_DATE;
-		else
+		else if(Display_Mode==MODE_DATE)
 			Display_Mode=MODE_MUSIC;
 //		showfpsflag = 1-showfpsflag;
 		key1_long_down=0;
 	}
 	if(short_key2_flag)
 	{
+		if(Current_Mode==MODE_CHROME) return;
 		short_key2_flag=0;
 		Device_Cmd.commandmotion++;			
 		if(Device_Cmd.commandmotion>5)
@@ -503,7 +512,6 @@ int main(void)
 	drache_cmd(&huart1,0xA002,3);
 //	HAL_RTC_MspInit(&hrtc);
 //  RTC_Set_WakeUp(RTC_WAKEUPCLOCK_CK_SPRE_16BITS,0); //配置WAKE UP中断,1秒钟中断一次
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -551,6 +559,7 @@ int main(void)
 				}
 				break;
 				case MODE_SHOW:ui.HUIMainShow();break;
+				case MODE_CHROME:ui.GAMEUIMainShow();break;
 				case MODE_OFFLINE:break;
 	//			default:ui.SUIMainShow();break;
 			}

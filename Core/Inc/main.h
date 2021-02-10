@@ -262,6 +262,7 @@ extern u16 Current_Mode ;
 #define MODE_WEATH_2		  		  0x0B
 #define MODE_DATE_1    	  		0x0C
 #define MODE_MENU    	  		0x0D
+#define MODE_CHROME    	  		0x0E
 
 #define Nebula True
 #define Dounsn False

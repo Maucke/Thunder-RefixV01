@@ -674,7 +674,7 @@ void OLED_Driver::OLED_SBFAny(int x,int y,char *ch,int w,uint16_t color)
 		switch(w)
 		{
 			case 8:OLED_BFAny(x,y,8,16,c,OCRB_F8x16,color,8);break;
-			case 9:OLED_BFAny(x,y,9,16,c,Self_F9x16,color);break;
+			case 9:if(c==0)c=1;else c+=' '-'.';OLED_BFAny(x,y,9,16,c,Self_F9x16,color);break;
 			case 10:OLED_BFAny(x,y,10,16,c,OCR_F10x16,color);break;
 			case 12:OLED_BFAny(x,y,12,16,c,OCR_F12x16,color);break;
 //			case 12:OLED_BFAny(x,y,12,16,c,OCRB_F12x16,color);break;

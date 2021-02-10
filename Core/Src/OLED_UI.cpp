@@ -6,6 +6,7 @@
 #include "usart.h"
 #include "math.h"
 #include "image.h"
+#include "string.h"
 
 #ifdef __cplusplus
 extern "C"  {
@@ -457,14 +458,336 @@ OLED_STATUS OLED_UI::SUIMainShow(){
 	oled.Draw_Line(DT+pit[SSLRT].current,96-2,DT+108,96-2,0xFFFF);
 	oled.Draw_Line(DT+27,33+10,DT+27+73,33+10,color_min);
 	sprintf(tempstr,"%02d",Device_Msg.cputemp/10);
-	oled.OLED_SHFAny(DT+38,48,tempstr,25,0xFFFF);
+	oled.OLED_SBFAny(DT+38,48,tempstr,25,0xFFFF);
 	sprintf(tempstr,"%03d",Device_Msg.cpuload/10);
-	oled.OLED_SHFAny(DT+29-8+pit[SSLF].current,15,tempstr,10,0xFFFF);
+	oled.OLED_SBFAny(DT+29-8+pit[SSLF].current,15,tempstr,10,0xFFFF);
 	sprintf(tempstr,"%03d",Device_Msg.gputemp/10);
-	oled.OLED_SHFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
+	oled.OLED_SBFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
 	return OLED_IDLE;
 }
+void begin();
+void OLED_UI::GAMEUI_In(){
+	int i;
+	begin();
+	for(i=70;i<75;i++)
+		SetCurrent(i,0);
+	SetTarget(70,30);
+	SetTarget(71,-20);
+}
+void OLED_UI::GAMEUI_Out(){
+	int i;
+	for(i=70;i<75;i++)
+		SetTarget(i,0);
+}
+void OLED_UI::GAMEUIDataPrss(){
+}
 
+typedef enum 
+{
+	ready,playing,gameover,loading,pause
+}GAMESTS;
+
+typedef struct 
+{
+	uint8_t is_jump;
+	uint8_t is_jumpfinish;
+	uint8_t is_fire;
+}PLAYSTS;
+
+GAMESTS gamestatus=loading;
+
+
+PLAYSTS status={False,False,True};
+void blue_click(){
+    if(status.is_jumpfinish)
+		{
+        status.is_jump=True;
+        status.is_jumpfinish=False;
+		}
+}
+
+typedef struct
+{
+	float x;float y;
+}POS;
+POS obj;
+POS player;
+
+double gametime=0;
+double distance=0;
+unsigned int highdistance=0;
+
+void begin(){
+    gamestatus=loading;
+    gametime=0;
+    distance=0;
+    status.is_jump=False;
+    status.is_fire=False;
+    status.is_jumpfinish=True;
+
+    obj.x = 160;
+    obj.y = 44;
+    player.y=43;
+}
+void fire(){
+	
+}
+void red_click(){
+    //start game
+    if(gamestatus==ready){
+				begin();
+        gamestatus=playing;}
+    //fire
+    else if(gamestatus==playing){
+        fire();gamestatus=pause;}
+    else if(gamestatus==pause){
+        gamestatus=playing;}
+    //restart game
+    else if(gamestatus==gameover){
+        begin();
+        gamestatus=playing;}
+}
+    
+
+
+void Display_pbmp(int x,int y,int w,int h,const uint8_t *ch) {
+  int i,j;
+	for(j=0;j<h;j++)  {
+		for(i=0;i<w;i++)  {
+			if(j*w+i>=0)
+				if(ch[j*w+i])
+					oled.Draw_Pixel(i+x,j+y); 
+		}
+	}
+}
+
+unsigned char imageplayer[] = {
+	0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,
+	0,0,0,0,0,0,0,0,0,0,1,1,0,1,1,1,1,1,1,1,
+	0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+	0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+	0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,
+	0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,
+	0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,
+	1,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,
+	1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,
+	1,1,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,0,0,0,
+	1,1,1,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,
+	1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,
+	0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,
+	0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,
+	0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,
+	0,0,0,0,0,1,1,0,0,0,1,1,0,0,0,0,0,0,0,0
+};
+
+unsigned char imageobj[] = {
+	0,0,0,0,1,1,1,1,0,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	1,1,0,1,1,1,1,1,1,0,1,1,
+	0,1,1,1,1,1,1,1,1,1,1,0,
+	0,0,1,1,1,1,1,1,1,1,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0,
+	0,0,0,1,1,1,1,1,1,0,0,0
+};
+const unsigned char gImage_player[][60] = { 
+	0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0XFE,0XFF,0XFB,0XFF,0XFF,0XBF,
+0XBF,0XBF,0X3F,0X3E,0X3F,0X7C,0XF8,0XF0,0XF0,0XF8,0XF8,0XFC,0XFE,0XFF,0XFF,0XFF,
+0XFF,0X7F,0X04,0X0C,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X01,0X03,0X3F,0X2F,0X07,
+0X03,0X07,0X3F,0X21,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,//stand/* 0X01,0X01,0X14,0X00,0X16,0X00, */
+
+	0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0XFE,0XFF,0XFB,0XFF,0XFF,0XBF,
+0XBF,0XBF,0X3F,0X3E,0X3F,0X7C,0XF8,0XF0,0XF0,0XF8,0XF8,0XFC,0XFE,0XFF,0XFF,0XFF,
+0XFF,0X7F,0X04,0X0C,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X01,0X03,0X3F,0X2F,0X07,
+0X03,0X03,0X07,0X05,0X04,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
+	
+0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0XFE,0XFF,0XFB,0XFF,0XFF,0XBF,
+0XBF,0XBF,0X3F,0X3E,0X3F,0X7C,0XF8,0XF0,0XF0,0XF8,0XF8,0XFC,0XFE,0XFF,0XFF,0XFF,
+0XFF,0X7F,0X04,0X0C,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X01,0X03,0X07,0X0F,0X0B,
+0X03,0X07,0X3F,0X21,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
+	
+};
+
+void draw_player(){
+    static int mstep=0;
+	static int count=0;
+	if(gamestatus!=pause)
+	{
+		if(count++%2)
+		mstep=1-mstep;
+    if(status.is_jump){
+        player.y-=(player.y-15)/5+1;
+        if(player.y<15)
+				{
+            status.is_jump=False;player.y=15;
+				}
+				mstep=-1;
+			}
+    else{
+        player.y+=(player.y-15)/5+1;//15 43   0 1
+        if(player.y>=43)
+				{
+            player.y=43;
+						status.is_jumpfinish=True;
+				}
+				else
+					mstep=-1;
+			}
+		}
+		if(mstep==2)
+			mstep=0;
+		oled.Fill_Rect(player.x+4,player.y+32+18,8,4,0x0);
+			oled.Display_bbmp(player.x,player.y+32,20,22,gImage_player[mstep+1]);
+//			Display_pbmp(player.x,player.y+32,20,20,imageplayer);
+}
+
+float hardspeed=0;
+int xpos[5],ypos[5],xlength[5];
+
+float delat=400;		
+
+void draw_obj(int movedistanse){
+	int i;
+    obj.x-=movedistanse;
+		delat-=movedistanse;
+	if(obj.x+2>=0&&obj.y+32+17>=0)
+		oled.Fill_Rect(obj.x+2,obj.y+32+17,7,4,0);
+		Display_pbmp(obj.x,obj.y+31+3,12,20,imageobj);
+	for(i=0;i<5;i++)
+		if(xpos[i])
+			oled.Draw_FastHLine(delat+xpos[i]-70-128,obj.y+31+23+ypos[i],xlength[i],color_half);
+    if(obj.x<=0){
+        obj.x=160+rand()%60;
+		}
+		if(delat<=0)
+		{
+			for(i=0;i<5;i++)
+			{
+			xpos[i]=rand()%40+i*20;
+			ypos[i]=rand()%3*2;
+			xlength[i]=rand()%20+5;
+			}
+			delat=256+128;
+		}
+}
+
+void check(){
+    if(obj.x-player.x<15 && obj.y-player.y<15){
+        gamestatus=gameover;
+    }
+}
+extern u8 short_key1_flag,short_key2_flag;
+char tempchar[50];
+
+OLED_STATUS OLED_UI::GAMEUIMainShow(){
+	static int count=0;
+    if(short_key1_flag)
+		{
+				short_key1_flag=0;
+        red_click();
+		}
+    if(gamestatus==loading){
+        gamestatus=ready;
+	}
+    if(gamestatus==pause){
+			if(short_key2_flag)
+			{
+				short_key2_flag=0;
+							red_click();
+			}
+			oled.Draw_Line(0, 95, 160, 95);
+			draw_obj(0);
+			draw_player();
+			sprintf(tempchar,"SCORE:%0.1fM",distance);
+			oled.OLED_SBFAny(80-strlen(tempchar)*9/2,10+pit[70].current-30,tempchar,9,0xffff);
+			hardspeed=0;
+			oled.OLED_SBFAny(80-strlen("PAUSE")*9/2,108+pit[71].current+20,"PAUSE",9,0xffff);
+	}
+    if(gamestatus==ready){
+			if(short_key2_flag)
+			{
+				short_key2_flag=0;
+							red_click();
+			}
+			sprintf(tempchar,"HIGHEST:%dM",highdistance);
+			oled.OLED_SBFAny(80-strlen(tempchar)*9/2,10+pit[70].current-30,tempchar,9,0xffff);
+			hardspeed=0;
+			oled.OLED_SBFAny(80-strlen("CHROME GAME")*9/2,108+pit[71].current+20,"CHROME GAME",9,0xffff);
+			oled.Draw_Line(0, 95, 160, 95);
+			draw_player();
+			draw_obj(4+hardspeed);
+			if(obj.x-player.x<30)
+				status.is_jump=True;
+		}
+    if(gamestatus==playing){
+			if(short_key2_flag)
+			{
+				short_key2_flag=0;
+							blue_click();
+			}
+			if(hardspeed<3)
+				hardspeed=distance/1000;
+			distance+=1+hardspeed/3;
+			gametime+=1;
+			oled.Draw_Line(0, 95, 160, 95);
+			sprintf(tempchar,"SCORE:%0.1fM",distance);
+			oled.OLED_SBFAny(80-strlen(tempchar)*9/2,10+pit[70].current-30,tempchar,9,0xffff);
+			
+			sprintf(tempchar,"HIGHEST:%dM",highdistance);
+			oled.OLED_SBFAny(80-strlen(tempchar)*9/2,108+pit[71].current+20,tempchar,9,0xffff);
+			draw_player();
+			draw_obj(4+hardspeed);
+			check();
+		}
+    if(gamestatus==gameover)
+		{
+			if(short_key2_flag)
+			{
+				short_key2_flag=0;
+							red_click();
+			}
+			if(count++%30>15)
+			{
+				if(highdistance<distance)
+				{
+					highdistance=distance;
+					sprintf(tempchar,"HIGHEST:%dM",highdistance);
+					oled.OLED_SBFAny(80-strlen(tempchar)*9/2,10+pit[70].current-30,tempchar,9,0xffff);
+				}
+				else
+				{
+					sprintf(tempchar,"SCORE:%0.1fM",distance);
+					oled.OLED_SBFAny(80-strlen(tempchar)*9/2,10+pit[70].current-30,tempchar,9,0xffff);
+				}
+			}
+			hardspeed=0;
+			oled.OLED_SBFAny(80-strlen("game over")*9/2,108+pit[71].current+20,"GAME OVER",9,0xffff);
+			oled.Draw_Line(0, 95, 160, 95);
+			draw_player();
+			draw_obj(4+hardspeed);
+			if(obj.x-player.x<30)
+				status.is_jump=True;
+//        oled.OLED_SBFAny({0} km.format(distance),2,0);
+//        oled.OLED_SBFAny(game over,25,30);
+			}
+	return OLED_IDLE;
+}
 
 
 

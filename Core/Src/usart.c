@@ -643,6 +643,7 @@ void AnalysisFFT(uint8_t *Buf)
 
 #define SAVESIZE 128
 
+extern unsigned int highdistance;
 u8 Flash_SaveCMD[SAVESIZE];
 void Tranfcmd(void)
 {
@@ -683,6 +684,12 @@ void Tranfcmd(void)
 	Flash_SaveCMD[22] = Device_Cmd.commandtimetheme>>8;
 	Flash_SaveCMD[23] = Device_Cmd.commandtimetheme&0xff;
 	
+	Flash_SaveCMD[24] = highdistance>>8;
+	Flash_SaveCMD[25] = highdistance&0xff;
+	
+	Flash_SaveCMD[26] = Display_Mode>>8;
+	Flash_SaveCMD[27] = Display_Mode&0xff;
+	
 //	for(i=0;i<6;i++)
 //		Flash_SaveCMD[22+i] = set.addr[i];
 //	for(i=0;i<10;i++)
@@ -704,7 +711,7 @@ void Tranfcmd(void)
 //	STMFLASH_Write(FLASH_NAME_ADDR,(uint32_t*)Device_Name,20);
 }
 
-#define VERIF 0x56
+#define VERIF 0x66
 
 void Recvcmd(void)
 {
@@ -716,6 +723,11 @@ void Recvcmd(void)
 	{
 		Device_Cmd.commandtoptheme = 5;
 		Flash_SaveCMD[31]=VERIF;
+		Flash_SaveCMD[24] = 0;
+		Flash_SaveCMD[25] = 0;
+		
+		Flash_SaveCMD[26] = 0;
+		Flash_SaveCMD[27] = MODE_DATE;
 		Tranfcmd();
 //		STMFLASH_Write(FLASH_NAME_ADDR,(uint32_t*)Device_Name,20);
 		
@@ -733,6 +745,8 @@ void Recvcmd(void)
 	Device_Cmd.commandtoptheme = MAKEWORD(Flash_SaveCMD[19],Flash_SaveCMD[18]);
 	Device_Cmd.commandlogotheme = MAKEWORD(Flash_SaveCMD[21],Flash_SaveCMD[20]);
 	Device_Cmd.commandtimetheme = MAKEWORD(Flash_SaveCMD[23],Flash_SaveCMD[22]);
+	highdistance = MAKEWORD(Flash_SaveCMD[25],Flash_SaveCMD[24]);
+	Display_Mode = MAKEWORD(Flash_SaveCMD[27],Flash_SaveCMD[26]);
 //	for(i=0;i<6;i++)
 //		set.addr[i] = Flash_SaveCMD[22+i];
 //	for(i=0;i<10;i++)
