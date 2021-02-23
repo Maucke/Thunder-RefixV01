@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : USART.h
-  * Description        : This file provides code for the configuration
-  *                      of the USART instances.
+  * @file    usart.h
+  * @brief   This file contains all the function prototypes for
+  *          the usart.c file
   ******************************************************************************
   * @attention
   *
@@ -17,10 +17,11 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __usart_H
-#define __usart_H
+#ifndef __USART_H__
+#define __USART_H__
+
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -257,6 +258,44 @@ extern UART_HandleTypeDef huart1;
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+extern uint8_t Uart_Recv1_Data;
+extern uint8_t Uart_Recv3_Data;
+extern u16 own_hour,own_min,own_sec;
+void ConvertData(void);
+void InitData(void);
+void InitWifi(void);
+void AnalysisComputermsg(uint8_t *Buf);
+void AnalysisComputername(uint8_t *Buf);
+void AnalysisMiStaus(uint8_t Data);
+void AnalysisFFT(uint8_t *Buf);
+void AnalysisCommand(uint8_t *Buf);
+void ClearFFT(void);
+
+void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data);
+int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...);
+void drache_clear(UART_HandleTypeDef *huart);
+
+void Tranfcmd(void);
+void Recvcmd(void);
+void AnalysisWiFiString(uint8_t *Buf);
+void AnalysisWiFiInter(uint8_t *Buf);
+void AnalysisKey(uint8_t *Buf);
+
+void SendCommand(void);
+int cont_str(char *s);
+void delay_ms(unsigned int Ms);
+/* USER CODE END Includes */
+
+extern UART_HandleTypeDef huart1;
+
+/* USER CODE BEGIN Private defines */
+
+
+/* USER CODE END Private defines */
+
+void MX_USART1_UART_Init(void);
+
+/* USER CODE BEGIN Prototypes */
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
@@ -274,14 +313,7 @@ void MX_USART1_UART_Init(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ usart_H */
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
+#endif /* __USART_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

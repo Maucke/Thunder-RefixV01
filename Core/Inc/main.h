@@ -202,6 +202,8 @@ void FFT_Pro(void);
 #define KEY_R_Pin GPIO_PIN_7
 #define KEY_R_GPIO_Port GPIOB
 #define KEY_R_EXTI_IRQn EXTI9_5_IRQn
+#define BAT_DET_Pin GPIO_PIN_9
+#define BAT_DET_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 typedef struct

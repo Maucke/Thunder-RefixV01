@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : ADC.c
-  * Description        : This file provides code for the configuration
-  *                      of the ADC instances.
+  * @file    adc.c
+  * @brief   This file provides code for the configuration
+  *          of the ADC instances.
   ******************************************************************************
   * @attention
   *
@@ -133,7 +133,22 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* adcHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+u16 Get_Adc(u32 ch)   
+{
+    ADC_ChannelConfTypeDef ADC1_ChanConf;
+    
+    ADC1_ChanConf.Channel=ch;                                   //通道
+    ADC1_ChanConf.Rank=1;                                       //第1个序列，序列1
+    ADC1_ChanConf.SamplingTime=ADC_SAMPLETIME_480CYCLES;        //采样时间
+    ADC1_ChanConf.Offset=0;                 
+    HAL_ADC_ConfigChannel(&hadc1,&ADC1_ChanConf);        //通道配置
+	
+    HAL_ADC_Start(&hadc1);                               //开启ADC
+	
+    HAL_ADC_PollForConversion(&hadc1,10);                //轮询转换
+ 
+	return (u16)HAL_ADC_GetValue(&hadc1);	        //返回最近一次ADC1规则组的转换结果
+}
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

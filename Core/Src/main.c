@@ -615,6 +615,7 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+
 uint8_t prt = 2;		
 STA systemstatus = offline;
 u16 offlinecount = 0;
@@ -751,6 +752,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		Time_Handle();
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
+		
+    float battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
 //		HAL_RTC_GetTime(&hrtc,&timenow,RTC_FORMAT_BIN);
 //		printf("Time:%02d:%02d:%02d\r\n",timenow.Hours,timenow.Minutes,timenow.Seconds); 
 //		HAL_RTC_GetDate(&hrtc,&datenow,RTC_FORMAT_BIN);
