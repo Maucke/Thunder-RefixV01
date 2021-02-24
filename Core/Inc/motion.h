@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define PITITEM 80
+#define PITITEM 90
 typedef struct
 {
 	float target;
@@ -82,4 +82,14 @@ void SetChannel(uint8_t index,uint8_t able);
 
 #define STSOK  69
 
+#define POSNRCT 75
+#define POSNRCD 76
+#define POSNTOP 77
+#define POSNBAR 78
+#define POSNBAT 79
+#define POSNBRO 80
+
+#define CRTVANE 81
+#define CRTVADS 82
+#define DAMPTYP 83
 #endif

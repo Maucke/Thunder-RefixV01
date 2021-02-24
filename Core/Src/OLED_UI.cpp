@@ -465,6 +465,260 @@ OLED_STATUS OLED_UI::SUIMainShow(){
 	oled.OLED_SBFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
 	return OLED_IDLE;
 }
+
+
+
+void OLED_UI::NUI_In(){
+	int i;
+	for(i=75;i<85;i++)
+		SetCurrent(i,0);
+	SetCurrent(POSNBAR,148) ;
+	SetCurrent(POSNBAT,170) ;
+	SetCurrent(POSNRCD,4) ;
+	SetTarget(POSNRCT,25);
+	SetTarget(POSNTOP,0);
+	SetTarget(POSNBAR,103);
+	SetTarget(POSNBAT,115);
+	SetTarget(DAMPTYP,0);
+}
+void OLED_UI::NUI_Out(){
+	int i;
+	for(i=75;i<85;i++)
+		SetTarget(i,0);
+	SetTarget(POSNRCT,-73) ;
+	SetTarget(POSNTOP,60) ;
+	SetTarget(POSNBAR,148) ;
+	SetTarget(POSNBAT,170) ;
+	SetTarget(DAMPTYP,0);
+}
+
+u8 DataDisType=0;
+u8 UnitDisType=0;
+u8 HWDisType=0;
+u8 Show_Float=False;
+char DataDis[20];
+char DataDisf[3];
+
+void OLED_UI::NUIDataPrss(){
+	switch(DataDisType)
+	{
+		case 3:
+			if(Device_Msg.cpufan>0)
+			{
+				
+				SetCurrent(POSNRCD,0+8) ;
+				SetTarget(POSNRCD,0+8);
+				SetTarget(CRTVANE,Device_Msg.cpufan);
+				HWDisType = CU_CPU;
+				Show_Float = False;
+				sprintf(DataDis,"%04d",(u16)pit[CRTVANE].target);
+				UnitDisType=UT_RPM;
+				pit[CRTVADS].target = pit[CRTVANE].target/50/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+//				sprintf(DataDis,"----");
+//				UnitDisType=UT_RPM;
+//				pit[CRTVANE].target = 0;
+			}
+			break;
+		case 0:
+			if(Device_Msg.cputemp>0)
+			{
+				SetTarget(POSNRCD,11+8)  ;
+				pit[CRTVANE].target = Device_Msg.cputemp/10;
+				HWDisType = CU_CPU;
+				Show_Float = True;
+				sprintf(DataDis,"%02d",(u16)pit[CRTVANE].target);
+				sprintf(DataDisf,"%01d",Device_Msg.cputemp%10);
+				UnitDisType=UT_DEG;
+				
+				pit[CRTVADS].target = pit[CRTVANE].target/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+				
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+			}
+			break;
+		case 1:
+			if(Device_Msg.cpuclock>0)
+			{
+				SetCurrent(POSNRCD,0+8) ;
+				SetTarget(POSNRCD,0+8)  ;
+				pit[CRTVANE].target = Device_Msg.cpuclock;
+				HWDisType = CU_CPU;
+				Show_Float = False;
+				sprintf(DataDis,"%04d",(u16)pit[CRTVANE].target);
+				UnitDisType=UT_MHZ;
+				pit[CRTVADS].target = pit[CRTVANE].target/50/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+//				sprintf(DataDis,"----");
+//				UnitDisType=UT_MHZ;
+//				pit[CRTVANE].target = 0;
+			}
+			break;
+		case 2:
+			SetTarget(POSNRCD,11+8)  ;
+			pit[CRTVANE].target = Device_Msg.cpuload/10;
+			HWDisType = CU_CPU;
+			Show_Float = True;
+//			if(Device_Msg.cpuload>0)
+			{
+				sprintf(DataDis,"%02d",(u16)pit[CRTVANE].target);
+				sprintf(DataDisf,"%01d",Device_Msg.cpuload%10);
+				UnitDisType=UT_PREC;
+				pit[CRTVADS].target = pit[CRTVANE].target/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+				
+			}break;
+		case 7:
+			if(Device_Msg.gpufan>0)
+			{
+				SetCurrent(POSNRCD,0+8) ;
+				SetTarget(POSNRCD,0+8) ;
+				pit[CRTVANE].target = Device_Msg.gpufan;
+				HWDisType = CU_GPU;
+				Show_Float = False;
+				sprintf(DataDis,"%04d",(u16)pit[CRTVANE].target);
+				UnitDisType=UT_RPM;
+				pit[CRTVADS].target = pit[CRTVANE].target/50/80*118;
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+				
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+//				sprintf(DataDis,"----");
+//				UnitDisType=UT_RPM;
+//				pit[CRTVANE].target = 0;
+			}
+			break;
+		case 4:
+			if(Device_Msg.gputemp>0)
+			{
+				SetTarget(POSNRCD,11+8) ;
+				pit[CRTVANE].target = Device_Msg.gputemp/10;
+				HWDisType = CU_GPU;
+				Show_Float = True;
+				sprintf(DataDis,"%02d",(u16)pit[CRTVANE].target);
+				sprintf(DataDisf,"%01d",Device_Msg.gputemp%10);
+				UnitDisType=UT_DEG;
+				pit[CRTVADS].target = pit[CRTVANE].target/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+			}
+			break;
+		case 5:
+			if(Device_Msg.gpuclock>0)
+			{
+				SetCurrent(POSNRCD,0+8) ;
+				SetTarget(POSNRCD,0+8) ;
+				pit[CRTVANE].target = Device_Msg.gpuclock;
+				HWDisType = CU_GPU;
+				Show_Float = False;
+				sprintf(DataDis,"%04d",(u16)pit[CRTVANE].target);
+				UnitDisType=UT_MHZ;
+				pit[CRTVADS].target = pit[CRTVANE].target/50/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+			}
+			else if(Current_Mode != MODE_GAME)
+			{
+				DataDisType++;return;
+//				sprintf(DataDis,"----");
+//				UnitDisType=UT_MHZ;
+//				pit[CRTVANE].target = 0;
+			}
+			break;
+		case 6:
+			SetTarget(POSNRCD,11+8);
+			pit[CRTVANE].target = Device_Msg.gpuload/10;
+			HWDisType = CU_GPU;
+			Show_Float = True;
+//			if(Device_Msg.gpuload>0)
+			{
+				sprintf(DataDis,"%02d",(u16)pit[CRTVANE].target);
+				sprintf(DataDisf,"%01d",Device_Msg.gpuload%10);
+				UnitDisType=UT_PREC;
+				
+				pit[CRTVADS].target = pit[CRTVANE].target/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+				
+			}break;
+		case 8:
+			SetTarget(POSNRCD,11+8);
+			pit[CRTVANE].target = Device_Msg.ramload/10;
+			HWDisType = CU_RAM;
+			Show_Float = True;
+//			if(Device_Msg.gpuload>0)
+			{
+				sprintf(DataDis,"%02d",(u16)pit[CRTVANE].target);
+				sprintf(DataDisf,"%01d",Device_Msg.ramload%10);
+				UnitDisType=UT_PREC;
+				pit[CRTVADS].target = pit[CRTVANE].target/80*118;
+				
+				if(pit[CRTVADS].target>=117)
+					pit[CRTVADS].target=117;
+				
+			}break;
+	}
+}
+OLED_STATUS OLED_UI::NUIMainShow(){
+	if(Device_Cmd.commandtoptheme<=6)
+	{
+		oled.Display_bmp(pit[POSNTOP].current,pit[POSNRCT].current-25,128,25,Corn_Top[Device_Cmd.commandtoptheme]);
+	}
+	else
+	{
+		oled.Display_bmp(pit[POSNTOP].current,pit[POSNRCT].current-25,128,25,Corn_Top[5]);
+	}
+		
+	oled.Display_bbmp(0,pit[POSNRCT].current,128,73,BMP_DataBackGround);
+	oled.Display_bbmp(89,pit[POSNRCT].current+69,35,5,Corn_BarUnit[UnitDisType],color_half);
+	oled.OLED_SBFAny(pit[POSNRCD].current,11+pit[POSNRCT].current,DataDis,22,color_now);
+	if(pit[DAMPTYP].match)
+		oled.Display_bbmp(10,pit[POSNRCT].current+62,23,7,Corn_DataType[HWDisType],color_half);
+	else
+		oled.Display_bbmp(10,pit[POSNRCT].current+62,23,7,Corn_DataType[HWDisType]);
+	oled.Display_bbmp(98,11+pit[POSNRCT].current,24,24,Corn_Unit[UnitDisType],color_half);
+	if((Show_Float)&&pit[CRTVANE].target < 100)
+	{
+		oled.OLED_SBFAny(pit[POSNRCD].current+52,pit[POSNRCT].current+27,DataDisf,13,color_half);
+		oled.Fill_Rect(pit[POSNRCD].current+46,pit[POSNRCT].current+45,2,4,color_half);
+	}
+	oled.Display_bbmp(0,pit[POSNBAT].current,128,5,Corn_Rule);
+	oled.Display_bbmp(0,pit[POSNBAT].current+5,128,5,Corn_RuleIndex,color_half);
+	oled.Fill_Rect(3+2,pit[POSNBAR].current+2,pit[CRTVADS].current,6,color_half);
+	oled.Draw_Rect(3,pit[POSNBAR].current,121,10);
+	return OLED_IDLE;
+}
+
+
 void begin();
 void OLED_UI::GAMEUI_In(){
 	int i;

@@ -6,7 +6,7 @@
 #include "OLED_Driver.h"
 #include "OLED_Animation.h"
 #include "motion.h"
-
+extern u8 DataDisType;
 #ifdef __cplusplus
 extern "C" {
 #endif

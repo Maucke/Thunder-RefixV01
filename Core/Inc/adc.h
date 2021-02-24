@@ -41,6 +41,7 @@ void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+u16 Get_Adc(u32 ch) ;
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

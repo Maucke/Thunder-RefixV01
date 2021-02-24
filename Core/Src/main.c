@@ -215,7 +215,7 @@ void MainSysRun()
 		switch(Current_Mode)
 		{
 			case MODE_GAME:ui.SUIDataPrss();break;
-//			case MODE_NORMAL:ui.NUIDataPrss();break;
+			case MODE_NORMAL:ui.NUIDataPrss();break;
 			case MODE_MUSIC:ui.MUIDataPrss();break;
 			case MODE_DATE:switch(TimeTHEME) 
 			{
@@ -240,7 +240,7 @@ void MainSysRun()
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUI_Out();;break;
-//				case MODE_NORMAL:ui.NUI_Out();break;
+				case MODE_NORMAL:ui.NUI_Out();break;
 				case MODE_MUSIC:FFT_Stop();ui.MUI_Out();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
@@ -263,7 +263,7 @@ void MainSysRun()
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUI_In();;break;
-//				case MODE_NORMAL:ui.NUI_In();break;
+				case MODE_NORMAL:ui.NUI_In();break;
 				case MODE_MUSIC:FFT_Start();ui.MUI_In();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
@@ -289,8 +289,8 @@ void MainSysRun()
 int Count=0;
 
 u8 Dataleng;
-char DataDis[20];
-char DataDisf[3];
+//char DataDis[20];
+//char DataDisf[3];
 
 u8 showfpsflag = 0;
 //void CopyString(char *ch1,char *ch2)
@@ -341,7 +341,7 @@ void module_pwr_enter_sleep_mode(void)
   GPIO_InitStruct.Pin = DS_SDA_Pin|DS_SCL_Pin;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
-//	printf("begin sleep mode\r\n");
+//	drache_printf("begin sleep mode\r\n");
 //	HAL_SuspendTick();
 //	HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON,PWR_SLEEPENTRY_WFI);
 //	oled.Clear_Screen();
@@ -368,7 +368,7 @@ void module_pwr_exit_sleep_mode(void)
 {
 	sleepflag=0;
 //	HAL_ResumeTick();
-//	printf("exit sleep mode\r\n");
+//	drache_printf("exit sleep mode\r\n");
 //  HAL_GPIO_WritePin(GPIOB, OLED_PW_Pin, GPIO_PIN_SET);//开启升压
 	
   NVIC_SystemReset();           //软件重启
@@ -463,6 +463,7 @@ int main(void)
 //	float pitch,roll,yaw; 			//欧拉角
 //	short aacx,aacy,aacz;			//加速度传感器原始数据
 //	short gyrox,gyroy,gyroz;		//陀螺仪原始数据
+//	float battVoltage;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -497,7 +498,7 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim4);
 	HAL_TIM_Base_Start_IT(&htim5);
 	HAL_TIM_Base_Start_IT(&htim9);
-	printf("Sys OK!\r\n");
+	drache_printf("Sys OK!\r\n");
   oled.Device_Init();
 	Recvcmd();
 	motion.OLED_AllMotion_Init();
@@ -506,10 +507,10 @@ int main(void)
 //	MPU_Init();
 //	mpu_dmp_init();
 ////	DS3231_Time_Init(DS3231_Init_Buf);
-//	printf("Time:%s\r\n",ds3231.Time); 
+//	drache_printf("Time:%s\r\n",ds3231.Time); 
 //	temp=MPU_Get_Temperature();	//得到温度值
-//	printf("temp:%d\r\n",temp);
-	drache_cmd(&huart1,0xA002,3);
+//	drache_printf("temp:%d\r\n",temp);
+	drache_cmd(0xA002,3);
 //	HAL_RTC_MspInit(&hrtc);
 //  RTC_Set_WakeUp(RTC_WAKEUPCLOCK_CK_SPRE_16BITS,0); //配置WAKE UP中断,1秒钟中断一次
   /* USER CODE END 2 */
@@ -524,18 +525,20 @@ int main(void)
 //		MUSIC_Mode();
 //	Time_Handle();
 ////	DS3231_Time_Init(DS3231_Init_Buf);
-//			printf("Time:%s\r\n",ds3231.Time); 
+//			drache_printf("Time:%s\r\n",ds3231.Time); 
 //		    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);	//得到加速度传感器数据
 //		    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);	//得到陀螺仪数据
 ////				mpu6050_send_data(aacx,aacy,aacz,gyrox,gyroy,gyroz);
-//				printf("aacx=%x,aacy=%x,aacz=%x\r\n",aacx,aacy,aacz);
-//				printf("gyrox=%d,gyroy=%d,gyroz=%d\r\n",gyrox,gyroy,gyroz);
+//				drache_printf("aacx=%x,aacy=%x,aacz=%x\r\n",aacx,aacy,aacz);
+//				drache_printf("gyrox=%d,gyroy=%d,gyroz=%d\r\n",gyrox,gyroy,gyroz);
 //		HAL_Delay(100);
 //		HAL_ADC_Start(&hadc1);
 //		HAL_ADC_PollForConversion(&hadc1, 50);
-//		printf("ADC:%X\r\n",HAL_ADC_GetValue(&hadc1));
+//		drache_printf("ADC:%X\r\n",HAL_ADC_GetValue(&hadc1));
 //		while(!Flag_Refrash)__ASM("NOP");
 		
+//    battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
+//		drache_printf("battVoltage:%0.1f\r\n",battVoltage);
 		{
 			Flag_Refrash=False;
 			oled.Clear_Screen();
@@ -547,7 +550,7 @@ int main(void)
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUIMainShow();break;
-	//			case MODE_NORMAL:ui.NUIMainShow();break;
+				case MODE_NORMAL:ui.NUIMainShow();break;
 				case MODE_MUSIC:ui.MUIMainShow();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
@@ -622,6 +625,7 @@ u16 offlinecount = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	static u16 TimeRun = 0;
+	static u16 TimeRun1 = 0;
 	if (htim->Instance == htim4.Instance)
 	{
 		if(key1_fall_flag==1)//发生按键按下事件
@@ -739,6 +743,25 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	if (htim->Instance == htim9.Instance)
 	{
+	  if(Device_Cmd.commandgametype<=8)
+		{
+			DataDisType = Device_Cmd.commandgametype;
+			pit[DAMPTYP].current = 30;
+			TimeRun1 = 0;
+		}
+		else
+		{
+			if(TimeRun1++>40)
+			{
+				TimeRun1 = 0;
+				{
+					DataDisType++;
+					pit[DAMPTYP].current = 30;
+					if(DataDisType>=8)
+						DataDisType=0;
+				}
+			}
+		}
 		if(offlinecount<3)
 		{
 			offlinecount++;
@@ -753,7 +776,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
 		
-    float battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
 //		HAL_RTC_GetTime(&hrtc,&timenow,RTC_FORMAT_BIN);
 //		printf("Time:%02d:%02d:%02d\r\n",timenow.Hours,timenow.Minutes,timenow.Seconds); 
 //		HAL_RTC_GetDate(&hrtc,&datenow,RTC_FORMAT_BIN);
@@ -803,7 +825,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 					module_pwr_exit_sleep_mode();
 				else
 					key1_fall_flag = 1;//开启按键标志
-				printf("KeyL Pressed!\r\n"); 
+				drache_printf("KeyL Pressed!\r\n"); 
 		}
 		break;
 		case KEY_R_Pin:
@@ -813,14 +835,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 					module_pwr_exit_sleep_mode();
 				else
 					key2_fall_flag = 1;//开启按键标志
-				printf("Key2 Pressed!\r\n");  
+				drache_printf("Key2 Pressed!\r\n");  
 		}
 		break;
 		case DS_INT_Pin:
 		if(HAL_GPIO_ReadPin(DS_INT_GPIO_Port,DS_INT_Pin)==GPIO_PIN_RESET)  //LED1翻转
 		{
 			Time_Handle();
-			printf("Time:%s\r\n",ds3231.Time); 
+//			drache_printf("Time:%s\r\n",ds3231.Time); 
 		}
 		break;
 	}

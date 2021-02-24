@@ -656,10 +656,10 @@ extern const unsigned char Self_F9x16[];
 extern const unsigned char OCR_F10x16[];
 extern const unsigned char OCR_F12x16[];
 extern const unsigned char OCRB_F12x16[];
-//extern const unsigned char Agency_F12x24[];
+extern const unsigned char Agency_F12x24[];
 extern const unsigned char OCR_F16x24[];
 extern const unsigned char OCRB_F16x24[];
-//extern const unsigned char Agency_F22x40[];
+extern const unsigned char Agency_F22x40[];
 //extern const unsigned char Robot_F32x46[];
 //extern const unsigned char RobotT_F32x46[];
 //extern const unsigned char RobotB_F32x46[];	
@@ -677,8 +677,10 @@ void OLED_Driver::OLED_SBFAny(int x,int y,char *ch,int w,uint16_t color)
 			case 9:if(c==0)c=1;else c+=' '-'.';OLED_BFAny(x,y,9,16,c,Self_F9x16,color);break;
 			case 10:OLED_BFAny(x,y,10,16,c,OCR_F10x16,color);break;
 			case 12:OLED_BFAny(x,y,12,16,c,OCR_F12x16,color);break;
+			case 13:OLED_BFAny(x,y,12,24,c,Agency_F12x24,color);break;
 //			case 12:OLED_BFAny(x,y,12,16,c,OCRB_F12x16,color);break;
 			case 16:OLED_BFAny(x,y,16,24,c,OCR_F16x24,color);break;
+			case 22:OLED_BFAny(x,y,22,40,c,Agency_F22x40,color);break;
 //			case 16:OLED_BFAny(x,y,16,24,c,OCRB_F16x24,color);break;
 			default:OLED_BFAny(x,y,8,16,c,OCRB_F8x16,color);break;
 		}

@@ -402,7 +402,7 @@ void AnalysisComputermsg(uint8_t *Buf)
 					
 					if(Device_Cmd.commandmode == 1&&Display_Mode == MODE_MUSIC)
 					{
-						drache_cmd(&huart1,0xA002,3);
+						drache_cmd(0xA002,3);
 					}
 //						if( > 1 && Display_Mode != MODE_MENU) 
 //						{
@@ -551,9 +551,9 @@ void AnalysisCommand(uint8_t *Buf)
 					{
 						Device_Cmd.commandtoptheme = MAKEWORD(Buf[6],Buf[5]);
 						if(Device_Cmd.commandtoptheme<2)
-							printf("Current top %d\r\n",Device_Cmd.commandtoptheme);
+							drache_printf("Current top %d\r\n",Device_Cmd.commandtoptheme);
 						else
-							printf("Current top 1\r\n");
+							drache_printf("Current top 1\r\n");
 						SaveFlag = True;
 					}break;
 				case Command_LOGOTHEME:
@@ -561,9 +561,9 @@ void AnalysisCommand(uint8_t *Buf)
 					{
 						Device_Cmd.commandlogotheme = MAKEWORD(Buf[6],Buf[5]);
 						if(Device_Cmd.commandlogotheme<6)
-							printf("Current logo %d\r\n",Device_Cmd.commandlogotheme);
+							drache_printf("Current logo %d\r\n",Device_Cmd.commandlogotheme);
 						else
-							printf("Current logo 5\r\n");
+							drache_printf("Current logo 5\r\n");
 						SaveFlag = True;
 					}break;
 				case Command_GAMETYPE:
@@ -571,11 +571,11 @@ void AnalysisCommand(uint8_t *Buf)
 					{
 						Device_Cmd.commandgametype = MAKEWORD(Buf[6],Buf[5]);
 						if(Device_Cmd.commandgametype<8)
-							printf("Mode %d\r\n",Device_Cmd.commandgametype);
+							drache_printf("Mode %d\r\n",Device_Cmd.commandgametype);
 						else
 						{
 							Device_Cmd.commandgametype=0xF;
-							printf("Mode Auto\r\n");
+							drache_printf("Mode Auto\r\n");
 						}
 						SaveFlag = True;
 					}break;
@@ -782,7 +782,7 @@ void delay_ms(unsigned int Ms)
 //	return i;
 //}
 
-void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data)
+void drache_cmd(u16 addr,u16 data)
 {
 	unsigned char buf[7]={0xFF,0x55,0,0,0x02,0,0};
 	buf[2] = (addr>>8)&0xFF;
@@ -790,10 +790,10 @@ void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data)
 	
 	buf[5] = (data>>8)&0xFF;
 	buf[6] = data&0xFF;
-	HAL_UART_Transmit(huart,buf,7,0xffff);
+	HAL_UART_Transmit(&huart1,buf,7,0xffff);
 }
 
-int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...)
+int drache_printf(const char *pcFormat, ...)
 {
 	va_list args;
 	int len;
@@ -804,15 +804,15 @@ int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...)
 	buf[4] = len;
 	va_end(args);
 	
-	HAL_UART_Transmit(huart,buf,len+5, 0xffff);
+	HAL_UART_Transmit(&huart1,buf,len+5, 0xffff);
 	return len; 
 }
 
 
-void drache_clear(UART_HandleTypeDef *huart)
+void drache_clear()
 {
 	unsigned char buf[]={0xFF,0x55,0xC0,0x02};
-	HAL_UART_Transmit(huart,buf,5, 0xffff);
+	HAL_UART_Transmit(&huart1,buf,5, 0xffff);
 }
 
 ConfigSet temps;

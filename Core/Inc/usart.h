@@ -233,9 +233,9 @@ void AnalysisFFT(uint8_t *Buf);
 void AnalysisCommand(uint8_t *Buf);
 void ClearFFT(void);
 
-void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data);
-int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...);
-void drache_clear(UART_HandleTypeDef *huart);
+void drache_cmd(u16 addr,u16 data);
+int drache_printf(const char *pcFormat, ...);
+void drache_clear();
 
 void Tranfcmd(void);
 void Recvcmd(void);
@@ -270,10 +270,6 @@ void AnalysisMiStaus(uint8_t Data);
 void AnalysisFFT(uint8_t *Buf);
 void AnalysisCommand(uint8_t *Buf);
 void ClearFFT(void);
-
-void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data);
-int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...);
-void drache_clear(UART_HandleTypeDef *huart);
 
 void Tranfcmd(void);
 void Recvcmd(void);
