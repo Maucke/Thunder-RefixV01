@@ -463,6 +463,7 @@ int main(void)
 //	float pitch,roll,yaw; 			//欧拉角
 //	short aacx,aacy,aacz;			//加速度传感器原始数据
 //	short gyrox,gyroy,gyroz;		//陀螺仪原始数据
+	float battVoltage;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -536,6 +537,8 @@ int main(void)
 //		printf("ADC:%X\r\n",HAL_ADC_GetValue(&hadc1));
 //		while(!Flag_Refrash)__ASM("NOP");
 		
+//    battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
+//		printf("battVoltage:%0.1f\r\n",battVoltage);
 		{
 			Flag_Refrash=False;
 			oled.Clear_Screen();
@@ -753,7 +756,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
 		
-    float battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
 //		HAL_RTC_GetTime(&hrtc,&timenow,RTC_FORMAT_BIN);
 //		printf("Time:%02d:%02d:%02d\r\n",timenow.Hours,timenow.Minutes,timenow.Seconds); 
 //		HAL_RTC_GetDate(&hrtc,&datenow,RTC_FORMAT_BIN);
@@ -820,7 +822,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		if(HAL_GPIO_ReadPin(DS_INT_GPIO_Port,DS_INT_Pin)==GPIO_PIN_RESET)  //LED1翻转
 		{
 			Time_Handle();
-			printf("Time:%s\r\n",ds3231.Time); 
+//			printf("Time:%s\r\n",ds3231.Time); 
 		}
 		break;
 	}
