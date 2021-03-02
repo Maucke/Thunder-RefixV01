@@ -459,10 +459,10 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-//	short temp;						//温度
-//	float pitch,roll,yaw; 			//欧拉角
-//	short aacx,aacy,aacz;			//加速度传感器原始数据
-//	short gyrox,gyroy,gyroz;		//陀螺仪原始数据
+	short temp;						//温度
+	float pitch,roll,yaw; 			//欧拉角
+	short aacx,aacy,aacz;			//加速度传感器原始数据
+	short gyrox,gyroy,gyroz;		//陀螺仪原始数据
 	float battVoltage;
   /* USER CODE END 1 */
 
@@ -504,12 +504,21 @@ int main(void)
 	motion.OLED_AllMotion_Init();
 	
 //	Time_Handle();
-//	MPU_Init();
-//	mpu_dmp_init();
-////	DS3231_Time_Init(DS3231_Init_Buf);
-//	printf("Time:%s\r\n",ds3231.Time); 
-//	temp=MPU_Get_Temperature();	//得到温度值
-//	printf("temp:%d\r\n",temp);
+	MPU_Init();
+	mpu_dmp_init();
+//	DS3231_Time_Init(DS3231_Init_Buf);
+	printf("Time:%s\r\n",ds3231.Time); 
+	temp=MPU_Get_Temperature();	//得到温度值
+	printf("temp:%d\r\n",temp);
+	while(1)
+	{
+		    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);	//得到加速度传感器数据
+		    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);	//得到陀螺仪数据
+//				mpu6050_send_data(aacx,aacy,aacz,gyrox,gyroy,gyroz);
+				printf("aacx=%x,aacy=%x,aacz=%x\r\n",aacx,aacy,aacz);
+				printf("gyrox=%d,gyroy=%d,gyroz=%d\r\n",gyrox,gyroy,gyroz);
+		HAL_Delay(500);
+	}
 	drache_cmd(&huart1,0xA002,3);
 //	HAL_RTC_MspInit(&hrtc);
 //  RTC_Set_WakeUp(RTC_WAKEUPCLOCK_CK_SPRE_16BITS,0); //配置WAKE UP中断,1秒钟中断一次
@@ -526,11 +535,6 @@ int main(void)
 //	Time_Handle();
 ////	DS3231_Time_Init(DS3231_Init_Buf);
 //			printf("Time:%s\r\n",ds3231.Time); 
-//		    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);	//得到加速度传感器数据
-//		    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);	//得到陀螺仪数据
-////				mpu6050_send_data(aacx,aacy,aacz,gyrox,gyroy,gyroz);
-//				printf("aacx=%x,aacy=%x,aacz=%x\r\n",aacx,aacy,aacz);
-//				printf("gyrox=%d,gyroy=%d,gyroz=%d\r\n",gyrox,gyroy,gyroz);
 //		HAL_Delay(100);
 //		HAL_ADC_Start(&hadc1);
 //		HAL_ADC_PollForConversion(&hadc1, 50);
@@ -821,7 +825,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		case DS_INT_Pin:
 		if(HAL_GPIO_ReadPin(DS_INT_GPIO_Port,DS_INT_Pin)==GPIO_PIN_RESET)  //LED1翻转
 		{
-			Time_Handle();
+//			Time_Handle();
 //			printf("Time:%s\r\n",ds3231.Time); 
 		}
 		break;

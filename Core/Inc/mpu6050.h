@@ -85,7 +85,7 @@
  
 //如果AD0脚(9脚)接地,IIC地址为0X68(不包含最低位).
 //如果接V3.3,则IIC地址为0X69(不包含最低位).
-#define MPU_ADDR				0X69
+#define MPU_ADDR				0X68
 
 
 ////因为开发板接GND,所以转为读写地址后,为0XD1和0XD0(如果接GND,则为0XD3和0XD2)  
