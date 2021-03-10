@@ -337,7 +337,7 @@
               <MiscControls>--cpp11</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F401xC</Define>
               <Undefine></Undefine>
-              <IncludePath>../Core/Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc;   ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;   ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;   ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Core/Inc;     ../Drivers/STM32F4xx_HAL_Driver/Inc;     ../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy;     ../Drivers/CMSIS/Device/ST/STM32F4xx/Include;     ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -415,6 +415,16 @@
               <FileName>OLED_UI.cpp</FileName>
               <FileType>8</FileType>
               <FilePath>..\Core\Src\OLED_UI.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>NIX_Anim.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Core\Src\NIX_Anim.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>NIX_Anim.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Inc\NIX_Anim.h</FilePath>
             </File>
           </Files>
         </Group>

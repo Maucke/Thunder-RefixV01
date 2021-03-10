@@ -41,6 +41,8 @@ void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 
+void MX_ADC1_GETVOL(void);
+void MX_ADC1_GETSound(void);
 u16 Get_Adc(u32 ch) ;
 /* USER CODE END Prototypes */
 

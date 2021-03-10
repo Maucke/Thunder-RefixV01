@@ -43,6 +43,7 @@
 #include "mpu6050.h"
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h" 
+#include "NIX_Anim.h" 
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,42 +61,39 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 uint8_t Flag_Refrash = False;
+uint8_t Flag_BATRefrash = False;
 uint8_t Flag_Blink = False;
 uint8_t Flag_Sleep = False;
 uint8_t Flag_Continue = False;
 uint8_t Flag_Reception = True;
 uint8_t OfflineCount = 6;
 uint8_t SystemActive = False;
+u8 adcintrun = False;
 u8 datatemp[256] = {};
 u16 RandomX=30,RandomY=30;
-
+int battype;
 u16 Display_Mode = MODE_CHROME;
 u16 Current_Mode = MODE_OFFLINE;
-	
+NixAnim nm;
 OLED_GFX oled = OLED_GFX();
 OLED_FFT fft = OLED_FFT();
 OLED_Animation motion = OLED_Animation();
 OLED_UI ui = OLED_UI();
 SAVE save={1,1};
-
-//#define Radius 60
-//#define RadiusC 56
-//#define RadiusB 53
-//#define HourRadius 30
-//#define MinRadius 40
-//#define SecRadius 50
+char tip[100]="TIPS";
+char battery[100]="BAT --";
 u16 ColorPointer[3];
 
 uint32_t adc_buf[NPT]={0};			//用于存储ADC转换结果的数组	
+uint32_t vol_buf[NPT]={0};			//用于存储ADC转换结果的数组	
 
 static long lBufInArray[NPT];					//传入给FFT的数组
-//long lBufOutArray[NPT/2];				//FFT输出 因为输出结果是对称的 所以我们只取了前面的一半
-//long lBufMagArray[NPT/2];				//每个频率对用的幅值
 static long lBufOutArray[NPT];				//FFT输出 
 long lBufMagArray[NPT];				//每个频率对用的幅值
 
 void FFT_Start(void)
 {
+	MX_ADC1_GETSound();
 	/*启动ADC的DMA传输，配合定时器触发ADC转换*/
 	HAL_ADC_Start_DMA(&hadc1, adc_buf, NPT);
 	/*开启定时器，用溢出时间来触发ADC*/
@@ -104,10 +102,19 @@ void FFT_Start(void)
 
 void FFT_Stop(void)
 {
-	/*停止ADC的DMA传输*/
+//	/*停止ADC的DMA传输*/
 	HAL_ADC_Stop_DMA(&hadc1);
 	/*停止定时器*/
 	HAL_TIM_Base_Stop(&htim3);
+}
+
+void GETVOL_Start(void)
+{
+	MX_ADC1_GETVOL();
+	/*启动ADC的DMA传输，配合定时器触发ADC转换*/
+	HAL_ADC_Start_DMA(&hadc1, vol_buf, NPT);
+	/*开启定时器，用溢出时间来触发ADC*/
+	HAL_TIM_Base_Start(&htim3);
 }
 
 void GetPowerMag(void)
@@ -153,57 +160,6 @@ void FFT_Pro(void)
 	GetPowerMag();	
 }
 
-////发送加速度传感器数据+陀螺仪数据(传感器帧)
-////aacx,aacy,aacz:x,y,z三个方向上面的加速度值
-////gyrox,gyroy,gyroz:x,y,z三个方向上面的陀螺仪值 
-//void mpu6050_send_data(short aacx,short aacy,short aacz,short gyrox,short gyroy,short gyroz)
-//{
-//	u8 tbuf[18]; 
-//	tbuf[0]=(aacx>>8)&0XFF;
-//	tbuf[1]=aacx&0XFF;
-//	tbuf[2]=(aacy>>8)&0XFF;
-//	tbuf[3]=aacy&0XFF;
-//	tbuf[4]=(aacz>>8)&0XFF;
-//	tbuf[5]=aacz&0XFF; 
-//	tbuf[6]=(gyrox>>8)&0XFF;
-//	tbuf[7]=gyrox&0XFF;
-//	tbuf[8]=(gyroy>>8)&0XFF;
-//	tbuf[9]=gyroy&0XFF;
-//	tbuf[10]=(gyroz>>8)&0XFF;
-//	tbuf[11]=gyroz&0XFF;
-//	tbuf[12]=0;//因为开启MPL后,无法直接读取磁力计数据,所以这里直接屏蔽掉.用0替代.
-//	tbuf[13]=0;
-//	tbuf[14]=0;
-//	tbuf[15]=0;
-//	tbuf[16]=0;
-//	tbuf[17]=0;
-//	
-//	HAL_UART_Transmit(&huart1, (uint8_t *)&tbuf, 18, 0xffff);
-//}	
-////通过串口1上报结算后的姿态数据给电脑(状态帧)
-////roll:横滚角.单位0.01度。 -18000 -> 18000 对应 -180.00  ->  180.00度
-////pitch:俯仰角.单位 0.01度。-9000 - 9000 对应 -90.00 -> 90.00 度
-////yaw:航向角.单位为0.1度 0 -> 3600  对应 0 -> 360.0度
-////csb:超声波高度,单位:cm
-////prs:气压计高度,单位:mm
-//void usart1_report_imu(short roll,short pitch,short yaw,short csb,int prs)
-//{
-//	u8 tbuf[12];   	
-//	tbuf[0]=(roll>>8)&0XFF;
-//	tbuf[1]=roll&0XFF;
-//	tbuf[2]=(pitch>>8)&0XFF;
-//	tbuf[3]=pitch&0XFF;
-//	tbuf[4]=(yaw>>8)&0XFF;
-//	tbuf[5]=yaw&0XFF;
-//	tbuf[6]=(csb>>8)&0XFF;
-//	tbuf[7]=csb&0XFF;
-//	tbuf[8]=(prs>>24)&0XFF;
-//	tbuf[9]=(prs>>16)&0XFF;
-//	tbuf[10]=(prs>>8)&0XFF;
-//	tbuf[11]=prs&0XFF;
-////	usart1_niming_report(0X01,tbuf,12);//状态帧,0X01
-//}  
-
 static u8 TimeTHEME = 0;
 
 void MainSysRun()
@@ -241,7 +197,7 @@ void MainSysRun()
 			{
 				case MODE_GAME:ui.SUI_Out();;break;
 //				case MODE_NORMAL:ui.NUI_Out();break;
-				case MODE_MUSIC:FFT_Stop();ui.MUI_Out();break;
+				case MODE_MUSIC:FFT_Stop();ui.MUI_Out();HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_RESET);break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
 					case 0:ui.TUI_Out();break;
@@ -264,7 +220,7 @@ void MainSysRun()
 			{
 				case MODE_GAME:ui.SUI_In();;break;
 //				case MODE_NORMAL:ui.NUI_In();break;
-				case MODE_MUSIC:FFT_Start();ui.MUI_In();break;
+				case MODE_MUSIC:MX_ADC1_Init();FFT_Start();HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_SET);//关闭MICui.MUI_In();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
 					case 0:ui.TUI_In();break;
@@ -309,22 +265,6 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-
-//void savedata(void)
-//{
-//	u32 msg[2];
-//	msg[0] = Device_Cmd.commandstyle;
-//	msg[1] = Device_Cmd.commandmotion;
-//	
-//	STMFLASH_Write(FLASH_SAVE_ADDR,(u32*)msg,2);
-//}
-//void getdata(void)
-//{
-//	u32 msg[2];
-//	STMFLASH_Read(FLASH_SAVE_ADDR,(u32*)msg,2);
-//	Device_Cmd.commandstyle = msg[0];
-//	Device_Cmd.commandmotion = msg[1];
-//}
 u8 sleepflag=0;
 void module_pwr_enter_sleep_mode(void)
 {
@@ -341,14 +281,11 @@ void module_pwr_enter_sleep_mode(void)
   GPIO_InitStruct.Pin = DS_SDA_Pin|DS_SCL_Pin;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 	
-//	printf("begin sleep mode\r\n");
-//	HAL_SuspendTick();
-//	HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON,PWR_SLEEPENTRY_WFI);
-//	oled.Clear_Screen();
-//	oled.Refrash_Screen();
   HAL_GPIO_WritePin(GPIOB, OLED_PW_Pin, GPIO_PIN_RESET);//关闭升压
   HAL_GPIO_WritePin(GPIOA, OLED_RST_Pin|OLED_DC_Pin|OLED_CS_Pin|GPIO_PIN_5|GPIO_PIN_7, GPIO_PIN_RESET);//关闭
 
+  HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_RESET);//关闭MIC
+  HAL_GPIO_WritePin(POWERSAVE_GPIO_Port, POWERSAVE_Pin, GPIO_PIN_RESET);//开启Powersave
 	HAL_TIM_Base_Stop_IT(&htim3);
 	HAL_TIM_Base_Stop_IT(&htim4);
 	HAL_TIM_Base_Stop_IT(&htim5);
@@ -361,16 +298,11 @@ void module_pwr_enter_sleep_mode(void)
   __HAL_RCC_PWR_CLK_DISABLE();
 	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
 	while(1);
-//	HAL_ResumeTick();
 }
 
 void module_pwr_exit_sleep_mode(void)
 {
 	sleepflag=0;
-//	HAL_ResumeTick();
-//	printf("exit sleep mode\r\n");
-//  HAL_GPIO_WritePin(GPIOB, OLED_PW_Pin, GPIO_PIN_SET);//开启升压
-	
   NVIC_SystemReset();           //软件重启
 }
 
@@ -403,19 +335,13 @@ void KeyProcess(void)
 			Device_Cmd.commandstyle++;			
 			if(Device_Cmd.commandstyle>6)
 				Device_Cmd.commandstyle=1;
-			
-//			oled.Display_hbmp(SCR_WIDTH/2-81/2,SCR_HEIGHT/2-26/2,81,26,themetop[Device_Cmd.commandstyle-1],0xFFFF);
 		}
 		else
 		{
 			Device_Cmd.commandtimetheme++;
 			if(Device_Cmd.commandtimetheme>2)
 				Device_Cmd.commandtimetheme=0;
-//			oled.Display_hbmp(SCR_WIDTH/2-81/2,SCR_HEIGHT/2-26/2,81,26,themetop[Device_Cmd.commandtimetheme],0xFFFF);
 		}
-//		oled.Refrash_Screen();
-//		Tranfcmd();
-//		oled.Clear_Screen();
 	}
 	else if(key1_long_down)
 	{
@@ -425,7 +351,6 @@ void KeyProcess(void)
 			Display_Mode=MODE_DATE;
 		else if(Display_Mode==MODE_DATE)
 			Display_Mode=MODE_MUSIC;
-//		showfpsflag = 1-showfpsflag;
 		key1_long_down=0;
 	}
 	if(short_key2_flag)
@@ -435,11 +360,6 @@ void KeyProcess(void)
 		Device_Cmd.commandmotion++;			
 		if(Device_Cmd.commandmotion>5)
 			Device_Cmd.commandmotion=0;
-		
-//		oled.Display_hbmp(SCR_WIDTH/2-81/2,SCR_HEIGHT/2-26/2,81,26,animationtop[Device_Cmd.commandmotion],0xFFFF);
-//		oled.Refrash_Screen();
-//		Tranfcmd();
-//		oled.Clear_Screen();
 	}
 	else if(key2_long_down)
 	{
@@ -449,6 +369,17 @@ void KeyProcess(void)
 }
 u16 fps = 0;
 char fpschar[20];
+
+float getpresent(float voltage)
+{
+	return voltage>2.8f?1000.0f/14.0f*voltage-200.0f:0.0f;
+}
+
+float battVoltage;
+int symIndex;
+extern const unsigned char icon_battery[][13];
+int motiontye = 0;
+int fonttye = 4;
 /* USER CODE END 0 */
 
 /**
@@ -459,11 +390,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-	short temp;						//温度
-	float pitch,roll,yaw; 			//欧拉角
-	short aacx,aacy,aacz;			//加速度传感器原始数据
-	short gyrox,gyroy,gyroz;		//陀螺仪原始数据
-	float battVoltage;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -502,26 +428,8 @@ int main(void)
   oled.Device_Init();
 	Recvcmd();
 	motion.OLED_AllMotion_Init();
-	
-//	Time_Handle();
-	MPU_Init();
-	mpu_dmp_init();
-//	DS3231_Time_Init(DS3231_Init_Buf);
-	printf("Time:%s\r\n",ds3231.Time); 
-	temp=MPU_Get_Temperature();	//得到温度值
-	printf("temp:%d\r\n",temp);
-	while(1)
-	{
-		    MPU_Get_Accelerometer(&aacx,&aacy,&aacz);	//得到加速度传感器数据
-		    MPU_Get_Gyroscope(&gyrox,&gyroy,&gyroz);	//得到陀螺仪数据
-//				mpu6050_send_data(aacx,aacy,aacz,gyrox,gyroy,gyroz);
-				printf("aacx=%x,aacy=%x,aacz=%x\r\n",aacx,aacy,aacz);
-				printf("gyrox=%d,gyroy=%d,gyroz=%d\r\n",gyrox,gyroy,gyroz);
-		HAL_Delay(500);
-	}
+	GETVOL_Start();
 	drache_cmd(&huart1,0xA002,3);
-//	HAL_RTC_MspInit(&hrtc);
-//  RTC_Set_WakeUp(RTC_WAKEUPCLOCK_CK_SPRE_16BITS,0); //配置WAKE UP中断,1秒钟中断一次
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -531,17 +439,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		MUSIC_Mode();
-//	Time_Handle();
-////	DS3231_Time_Init(DS3231_Init_Buf);
-//			printf("Time:%s\r\n",ds3231.Time); 
-//		HAL_Delay(100);
-//		HAL_ADC_Start(&hadc1);
-//		HAL_ADC_PollForConversion(&hadc1, 50);
-//		printf("ADC:%X\r\n",HAL_ADC_GetValue(&hadc1));
-//		while(!Flag_Refrash)__ASM("NOP");
-		
-//    battVoltage = (float)Get_Adc(ADC_CHANNEL_9) / 4095.0f * 3.3f * 2;
+//    battVoltage = (float)Get_Adc(ADC_CHANNEL_1) / 4095.0f * 3.3f * 2;
 //		printf("battVoltage:%0.1f\r\n",battVoltage);
 		{
 			Flag_Refrash=False;
@@ -556,7 +454,11 @@ int main(void)
 				case MODE_GAME:ui.SUIMainShow();break;
 	//			case MODE_NORMAL:ui.NUIMainShow();break;
 				case MODE_MUSIC:ui.MUIMainShow();break;
-				case MODE_DATE:switch(TimeTHEME) 
+				case MODE_DATE:
+					
+//				battVoltage=(float)Get_Adc(ADC_CHANNEL_1) / 4095.0f * 3.57f * 2;
+//				symIndex = getpresent(battVoltage);
+				switch(TimeTHEME) 
 				{
 					case 0:ui.TUIMainShow();break;
 					case 1:ui.T1UIMainShow();break;
@@ -570,7 +472,22 @@ int main(void)
 				case MODE_OFFLINE:break;
 	//			default:ui.SUIMainShow();break;
 			}
+//			oled.OLED_SBFAny(10,10,tip,9,0xffff);
+//			oled.OLED_SBFAny(10,25,battery,9,0xffff);
+			oled.Display_bbmp(160-13-2,2,13,8,icon_battery[battype]);
+			nm.animotion(ds3231.Time, motiontye, fonttye, 0);
+			nm.gram2one();
+			oled.Display_bbmp(160-13-2-48-4,2,48,8,onegram);
 			oled.Refrash_Screen();
+		}
+		if(Flag_BATRefrash)
+		{
+			Flag_BATRefrash = False;
+			while(adcintrun)
+				HAL_Delay(1);
+			FFT_Stop();
+			HAL_Delay(5);
+			GETVOL_Start();
 		}
 		HAL_Delay(5);
   }
@@ -735,21 +652,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 			DampAutoPos(0);
 			MainSysRun();
-		
 	}
 	if (htim->Instance == htim5.Instance)
 	{
 		oled.Set_Wheel(TimeRun++%96);
 		oled.Calc_Color();
-//		HAL_GPIO_TogglePin(SYSLED_GPIO_Port, SYSLED_Pin);
+		HAL_GPIO_TogglePin(SYSLED_GPIO_Port, SYSLED_Pin);
 		Flag_Refrash = True;
 	}
 	if (htim->Instance == htim9.Instance)
 	{
+		
 		if(offlinecount<3)
-		{
 			offlinecount++;
-		}
 		else if(systemstatus==online)
 		{
 			systemstatus=offline;
@@ -759,6 +674,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		Time_Handle();
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
+		Flag_BATRefrash = True;
 		
 //		HAL_RTC_GetTime(&hrtc,&timenow,RTC_FORMAT_BIN);
 //		printf("Time:%02d:%02d:%02d\r\n",timenow.Hours,timenow.Minutes,timenow.Seconds); 
@@ -829,26 +745,79 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 //			printf("Time:%s\r\n",ds3231.Time); 
 		}
 		break;
+		case CHGLED_Pin:
+		if(HAL_GPIO_ReadPin(CHGLED_GPIO_Port,CHGLED_Pin)==GPIO_PIN_RESET)  //LED1翻转
+		{
+			battype=4;
+			sprintf(tip,"CHARGING");
+		}
+		else
+		{
+			sprintf(tip,"DISCHARGE");
+		}
+		break;
 	}
 }
+
+void GetVoltage()
+{
+	int i;
+	long volsum=0;
+	for(i=0;i<NPT;i++)
+		volsum+=vol_buf[i];
+	
+	battVoltage=(float)volsum/ NPTF / 4095.0f * 3.57f * 2.0f;
+	symIndex = getpresent(battVoltage);
+	                                                                                                                                                                                                                                                                                                               
+	sprintf(battery,"BAT %d %0.2fV %d",symIndex,battVoltage,vol_buf[50]);
+	if(HAL_GPIO_ReadPin(CHGLED_GPIO_Port,CHGLED_Pin)==GPIO_PIN_RESET)
+		battype=4;
+	else
+	{
+		if(symIndex>=80)
+			battype=5;
+		else if(symIndex>=60)
+			battype=3;
+		else if(symIndex>=40)
+			battype=2;
+		else if(symIndex>=20)
+			battype=1;
+		else if(symIndex>=10)
+			battype=0;
+		else
+			battype=6;
+	}
+}
+extern u8 ADCCH;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	int i;
-//	HAL_ADC_Stop_DMA(&hadc1);	//停止ADC的DMA传输
-	FFT_Stop();
-	FFT_Pro();	
-	if(systemstatus==offline)
+	adcintrun = True;
+	if(ADCCH == 0)
 	{
-		for(i=0;i<200;i++)
+		FFT_Stop();
+		FFT_Pro();	
+		if(systemstatus==offline)
 		{
-			if(lBufMagArray[i]/prt>20)
-				Device_Msg.fft[i] = lBufMagArray[i]/prt;
-			else
-				Device_Msg.fft[i] = lBufMagArray[i]/prt/4;
+			for(i=0;i<200;i++)
+			{
+				if(lBufMagArray[i]/prt>10)
+					Device_Msg.fft[i] = lBufMagArray[i]/prt;
+				else
+					Device_Msg.fft[i] = lBufMagArray[i]/prt/2;
+			}
+			Device_Msg.leftvol=Device_Msg.fft[1];
 		}
-		Device_Msg.leftvol=Device_Msg.fft[1];
+		FFT_Start();
 	}
-  FFT_Start();
+	else
+	{
+		FFT_Stop();
+		GetVoltage();
+		if(Current_Mode==MODE_MUSIC)
+			FFT_Start();
+	}
+	adcintrun = False;
 }
 
 /* USER CODE END 4 */

@@ -163,6 +163,7 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 extern u8 flushok;
 #define NPT 256									//样本数量
+#define NPTF 256.0f									//样本数量
 #define PI2 6.28318530717959
 //采样率计算
 //分辨率：Fs/NPT 
@@ -189,6 +190,11 @@ void FFT_Pro(void);
 #define OLED_CS_GPIO_Port GPIOA
 #define OLED_PW_Pin GPIO_PIN_12
 #define OLED_PW_GPIO_Port GPIOB
+#define CHGLED_Pin GPIO_PIN_11
+#define CHGLED_GPIO_Port GPIOA
+#define CHGLED_EXTI_IRQn EXTI15_10_IRQn
+#define MICSHUTDN_Pin GPIO_PIN_12
+#define MICSHUTDN_GPIO_Port GPIOA
 #define DS_SDA_Pin GPIO_PIN_3
 #define DS_SDA_GPIO_Port GPIOB
 #define DS_SCL_Pin GPIO_PIN_4
@@ -202,8 +208,8 @@ void FFT_Pro(void);
 #define KEY_R_Pin GPIO_PIN_7
 #define KEY_R_GPIO_Port GPIOB
 #define KEY_R_EXTI_IRQn EXTI9_5_IRQn
-#define BAT_DET_Pin GPIO_PIN_9
-#define BAT_DET_GPIO_Port GPIOB
+#define POWERSAVE_Pin GPIO_PIN_9
+#define POWERSAVE_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 typedef struct

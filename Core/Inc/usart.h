@@ -296,6 +296,82 @@ extern UART_HandleTypeDef huart1;
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+extern uint8_t Uart_Recv1_Data;
+extern uint8_t Uart_Recv3_Data;
+extern u16 own_hour,own_min,own_sec;
+void ConvertData(void);
+void InitData(void);
+void InitWifi(void);
+void AnalysisComputermsg(uint8_t *Buf);
+void AnalysisComputername(uint8_t *Buf);
+void AnalysisMiStaus(uint8_t Data);
+void AnalysisFFT(uint8_t *Buf);
+void AnalysisCommand(uint8_t *Buf);
+void ClearFFT(void);
+
+void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data);
+int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...);
+void drache_clear(UART_HandleTypeDef *huart);
+
+void Tranfcmd(void);
+void Recvcmd(void);
+void AnalysisWiFiString(uint8_t *Buf);
+void AnalysisWiFiInter(uint8_t *Buf);
+void AnalysisKey(uint8_t *Buf);
+
+void SendCommand(void);
+int cont_str(char *s);
+void delay_ms(unsigned int Ms);
+/* USER CODE END Includes */
+
+extern UART_HandleTypeDef huart1;
+
+/* USER CODE BEGIN Private defines */
+
+
+/* USER CODE END Private defines */
+
+void MX_USART1_UART_Init(void);
+
+/* USER CODE BEGIN Prototypes */
+extern uint8_t Uart_Recv1_Data;
+extern uint8_t Uart_Recv3_Data;
+extern u16 own_hour,own_min,own_sec;
+void ConvertData(void);
+void InitData(void);
+void InitWifi(void);
+void AnalysisComputermsg(uint8_t *Buf);
+void AnalysisComputername(uint8_t *Buf);
+void AnalysisMiStaus(uint8_t Data);
+void AnalysisFFT(uint8_t *Buf);
+void AnalysisCommand(uint8_t *Buf);
+void ClearFFT(void);
+
+void drache_cmd(UART_HandleTypeDef *huart,u16 addr,u16 data);
+int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...);
+void drache_clear(UART_HandleTypeDef *huart);
+
+void Tranfcmd(void);
+void Recvcmd(void);
+void AnalysisWiFiString(uint8_t *Buf);
+void AnalysisWiFiInter(uint8_t *Buf);
+void AnalysisKey(uint8_t *Buf);
+
+void SendCommand(void);
+int cont_str(char *s);
+void delay_ms(unsigned int Ms);
+/* USER CODE END Includes */
+
+extern UART_HandleTypeDef huart1;
+
+/* USER CODE BEGIN Private defines */
+
+
+/* USER CODE END Private defines */
+
+void MX_USART1_UART_Init(void);
+
+/* USER CODE BEGIN Prototypes */
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
