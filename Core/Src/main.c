@@ -328,8 +328,14 @@ void KeyProcess(void)
 //	return;
 	if(short_key1_flag)
 	{
-		if(Current_Mode==MODE_CHROME) return;
 		short_key1_flag=0;
+		if(Current_Mode==MODE_CHROME) return;
+		if(!oled.GetTipState()) 
+		{
+			oled.TipStart();
+			return;
+		}
+		oled.TipStart();
 		if(Display_Mode==MODE_MUSIC)
 		{
 			Device_Cmd.commandstyle++;			
@@ -355,8 +361,14 @@ void KeyProcess(void)
 	}
 	if(short_key2_flag)
 	{
-		if(Current_Mode==MODE_CHROME) return;
 		short_key2_flag=0;
+		if(Current_Mode==MODE_CHROME) return;
+		if(!oled.GetTipState()) 
+		{
+			oled.TipStart();
+			return;
+		}
+		oled.TipStart();
 		Device_Cmd.commandmotion++;			
 		if(Device_Cmd.commandmotion>5)
 			Device_Cmd.commandmotion=0;
@@ -474,10 +486,10 @@ int main(void)
 			}
 //			oled.OLED_SBFAny(10,10,tip,9,0xffff);
 //			oled.OLED_SBFAny(10,25,battery,9,0xffff);
-			oled.Display_bbmp(160-13-2,2,13,8,icon_battery[battype]);
+			oled.Display_bbmp(160-13-2,-8,13,8,icon_battery[battype]);
 			nm.animotion(ds3231.Time, motiontye, fonttye, 0);
 			nm.gram2one();
-			oled.Display_bbmp(160-13-2-48-4,2,48,8,onegram);
+			oled.Display_bbmp(160-13-2-48-4,-8,48,8,onegram);
 			oled.Refrash_Screen();
 		}
 		if(Flag_BATRefrash)
@@ -713,6 +725,7 @@ void Delayms(u16 ms)
   for(i=0;i<ms;i++)
     for(j=0;j<0x0500;j++) k++;
 }
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	Delayms(20);

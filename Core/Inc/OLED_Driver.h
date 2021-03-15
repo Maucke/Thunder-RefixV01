@@ -78,6 +78,8 @@ extern "C" {
 			u16 WheelP(u16 WheelPos);
 			u16 WheelPw(u16 WheelPos);
 		
+      void TipStart(void);
+			int GetTipState(void);
 			u16 ConvertColor(u8 red,u8 green,u8 blue);
       void Device_Init(void);
       void Clear_Screen(void);
@@ -102,6 +104,7 @@ extern "C" {
     
       void Write_Data(uint8_t dat);
       void Write_Data(uint8_t* dat_p, long length);
+      void Write_Data(uint8_t* dat_p,int delta, long length);
     
       void Draw_FastHLine(int16_t x, int16_t y, int16_t length);
       void Draw_FastHLine(int16_t x, int16_t y, int16_t length,uint16_t color);

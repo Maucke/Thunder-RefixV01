@@ -8,7 +8,7 @@
 uint8_t color_byte[2],color_Damp_byte[2];
 
 uint16_t wheel;
-uint8_t OLED_GRAM[2*SCR_WIDTH*SCR_HEIGHT];
+uint8_t OLED_GRAM[2*SCR_WIDTH*(SCR_HEIGHT+8)];
 uint16_t color_now,color_half,color_min;
 
 #ifdef __cplusplus
@@ -243,8 +243,18 @@ void OLED_Driver::Write_Data(uint8_t* dat_p, long length) {
 	
   OLED_DC(GPIO_PIN_RESET);
   OLED_CS(GPIO_PIN_SET);
-  
 }
+
+void OLED_Driver::Write_Data(uint8_t* dat_p,int delta, long length) {
+
+  OLED_CS(GPIO_PIN_RESET);
+  OLED_DC(GPIO_PIN_SET);
+  while(HAL_SPI_Transmit(&hspi1,dat_p+delta,length,0xffff) != HAL_OK);
+	
+  OLED_DC(GPIO_PIN_RESET);
+  OLED_CS(GPIO_PIN_SET);
+}
+
 void OLED_Driver::SCR_reg(int idx, int value)
 {
   Write_Command(idx);
@@ -265,66 +275,59 @@ void OLED_Driver::RAM_Address(void)  {
 //  SCR_reg(0x21,0);
 }
 
+int Tipstate = 0;
+int Tipcount = 0;
+int Tiptime = 0;
+
+int OLED_Driver::GetTipState(void)  {
+	return Tipstate;
+}
+void OLED_Driver::TipStart(void)  {
+	Tipstate = 1;
+	Tiptime = 0;
+}
 
 void OLED_Driver::Refrash_Screen(void)  {
     
   RAM_Address();
   Write_Command(0x22);
-//  for(i=0;i<;i++)  {
-      Write_Data(OLED_GRAM,2*SCR_WIDTH*SCR_HEIGHT);//RAM data clear
-//  }
+	if(Tipstate)
+	{
+		if(Tipcount<8)
+			Tipcount+=2;
+		else if(Tipcount==8)
+		{
+			if(Tiptime<50)
+				Tiptime++;
+			else
+			{
+				Tipstate=0;
+				Tiptime=0;
+			}
+		}
+	}
+	else if(Tipcount>0)
+		Tipcount-=2;
+  Write_Data(OLED_GRAM,(8-Tipcount)*160*2,2*SCR_WIDTH*SCR_HEIGHT);//RAM data clear
 }
   
 
 void OLED_Driver::Clear_Screen(void)  {
   
   int i,j;
-  for(i=0;i<SCR_HEIGHT;i++)  {
+  for(i=0;i<SCR_HEIGHT+8;i++)  {
     for(j=0;j<SCR_WIDTH;j++)  {
       OLED_GRAM[2*j+i*SCR_WIDTH*2] = 0;
       OLED_GRAM[2*j+1+i*SCR_WIDTH*2] = 0;
     }
   }
 }
-  
-//void OLED_Driver::Set_Coordinate(uint16_t x, uint16_t y)  {
-
-//  if ((x >= SCR_WIDTH) || (y >= SCR_HEIGHT)) 
-//    return;
-//  //Set x and y coordinate
-//  Write_Command(SCR_CMD_SETCOLUMN);
-//  Write_Data(x);
-//  Write_Data(SCR_WIDTH-1);
-//  Write_Command(SCR_CMD_SETROW);
-//  Write_Data(y);
-//  Write_Data(SCR_HEIGHT-1);
-//  Write_Command(SCR_CMD_WRITERAM);
-//}
-  
-//void OLED_Driver::Set_Address(uint8_t column, uint8_t row)  {
-//  
-//  Write_Command(SCR_CMD_SETCOLUMN);  
-//  Write_Data(column);	//X start 
-//  Write_Data(column);	//X end 
-//  Write_Command(SCR_CMD_SETROW); 
-//  Write_Data(row);	//Y start 
-//  Write_Data(row+7);	//Y end 
-//  Write_Command(SCR_CMD_WRITERAM); 
-//}
-//  
-//  
-//void  OLED_Driver::Invert(bool v) {
-//  
-//  if (v)
-//    Write_Command(SCR_CMD_INVERTDISPLAY);
-//  else
-//    Write_Command(SCR_CMD_NORMALDISPLAY);
-//}
 
 void OLED_Driver::Draw_Pixel(long x, long y)
 {
+	y+=8;
   // Bounds check.
-  if ((x >= SCR_WIDTH) || (y >= SCR_HEIGHT)) return;
+  if ((x >= SCR_WIDTH) || (y >= SCR_HEIGHT+8)) return;
   if ((x < 0) || (y < 0)) return;
 
 	OLED_GRAM[2*x+y*SCR_WIDTH*2] = color_byte[0];
@@ -334,8 +337,9 @@ void OLED_Driver::Draw_Pixel(long x, long y)
 
 void OLED_Driver::Draw_Pixel(long x, long y,uint16_t color)
 {
+	y+=8;
   // Bounds check.
-  if ((x >= SCR_WIDTH) || (y >= SCR_HEIGHT)) return;
+  if ((x >= SCR_WIDTH) || (y >= SCR_HEIGHT+8)) return;
   if ((x < 0) || (y < 0)) return;
 
 	OLED_GRAM[2*x+y*SCR_WIDTH*2] = (uint8_t)(color >> 8);

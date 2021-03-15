@@ -370,6 +370,7 @@ void OLED_UI::HUI_Out(){
 	int i;
 	for(i=50;i<60;i++)
 		SetTarget(i,0);
+	SetTarget(50,320+16);
 }
 void OLED_UI::HUIDataPrss(){
 }
@@ -445,24 +446,24 @@ OLED_STATUS OLED_UI::SUIMainShow(){
 	for(i=0;i<9;i++)
 			oled.Draw_Pixel(DT+9+28+4+8+i*5,pit[SSUP].current+8,color_min);
 	
-	oled.Draw_Line(DT+0,0,DT+pit[SSRD].current,pit[SSRD].current,color_now);
-	oled.Draw_Line(DT+127,0,DT+127-pit[SSRD].current,pit[SSRD].current,color_now);
-	oled.Draw_Line(DT+pit[SSRD].current,127-pit[SSRD].current,DT+0,127,color_now);
-	oled.Draw_Line(DT+127-pit[SSRD].current,127-pit[SSRD].current,DT+127,127,color_now);
+	oled.Draw_Line(0,0,pit[SSRD].current,pit[SSRD].current,color_now);
+	oled.Draw_Line(DT*2+127,0,DT*2+127-pit[SSRD].current,pit[SSRD].current,color_now);
+	oled.Draw_Line(pit[SSRD].current,127-pit[SSRD].current,0,127,color_now);
+	oled.Draw_Line(DT*2+127-pit[SSRD].current,127-pit[SSRD].current,DT*2+127,127,color_now);
 	
-	oled.Display_hbmp(DT+9-5+pit[SSRD].current,pit[SSRD].current,28,10,GeForce_LOAD,color_now);
-	oled.Display_hbmp(DT+101+5-pit[SSRD].current,pit[SSRD].current,21,10,GeForce_SYS,color_now);
+	oled.Display_hbmp(9-5+pit[SSRD].current,pit[SSRD].current,28,10,GeForce_LOAD,color_now);
+	oled.Display_hbmp(2*DT+101+5-pit[SSRD].current,pit[SSRD].current,21,10,GeForce_SYS,color_now);
 	oled.Display_hbmp(DT+27+1,33,74,10,GeForce_TEMP,color_now);
 	oled.Display_hbmp(DT+48,88,33,13,GeForce_CENT,color_now);
 	oled.Draw_Line(DT+20,96-2,DT+pit[SSLLF].current,96-2,0xFFFF);
 	oled.Draw_Line(DT+pit[SSLRT].current,96-2,DT+108,96-2,0xFFFF);
 	oled.Draw_Line(DT+27,33+10,DT+27+73,33+10,color_min);
 	sprintf(tempstr,"%02d",Device_Msg.cputemp/10);
-	oled.OLED_SBFAny(DT+38,48,tempstr,25,0xFFFF);
+	oled.OLED_SHFAny(DT+38,48,tempstr,25,0xFFFF);
 	sprintf(tempstr,"%03d",Device_Msg.cpuload/10);
-	oled.OLED_SBFAny(DT+29-8+pit[SSLF].current,15,tempstr,10,0xFFFF);
+	oled.OLED_SHFAny(DT+29-8+pit[SSLF].current,15,tempstr,10,0xFFFF);
 	sprintf(tempstr,"%03d",Device_Msg.gputemp/10);
-	oled.OLED_SBFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
+	oled.OLED_SHFAny(DT+69+1+8-pit[SSLF].current,15,tempstr,10,0xFFFF);
 	return OLED_IDLE;
 }
 void begin();
