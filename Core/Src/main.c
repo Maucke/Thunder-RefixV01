@@ -91,6 +91,11 @@ static long lBufInArray[NPT];					//传入给FFT的数组
 static long lBufOutArray[NPT];				//FFT输出 
 long lBufMagArray[NPT];				//每个频率对用的幅值
 
+uint8_t prt = 2;		
+STA systemstatus = offline;
+u16 offlinecount = 0;
+u16 sleepcount = 0;
+
 void FFT_Start(void)
 {
 	MX_ADC1_GETSound();
@@ -265,10 +270,11 @@ void SystemClock_Config(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-u8 sleepflag=0;
+//u8 sleepflag=0;
 void module_pwr_enter_sleep_mode(void)
 {
-	sleepflag=1;
+//	sleepflag=1;
+	printf("I'm sleep!\r\n"); 
   oled.SCR_reg(0x06, 0x00);//shutdown screen
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 	
@@ -285,7 +291,6 @@ void module_pwr_enter_sleep_mode(void)
   HAL_GPIO_WritePin(GPIOA, OLED_RST_Pin|OLED_DC_Pin|OLED_CS_Pin|GPIO_PIN_5|GPIO_PIN_7, GPIO_PIN_RESET);//关闭
 
   HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_RESET);//关闭MIC
-  HAL_GPIO_WritePin(POWERSAVE_GPIO_Port, POWERSAVE_Pin, GPIO_PIN_RESET);//开启Powersave
 	HAL_TIM_Base_Stop_IT(&htim3);
 	HAL_TIM_Base_Stop_IT(&htim4);
 	HAL_TIM_Base_Stop_IT(&htim5);
@@ -294,17 +299,18 @@ void module_pwr_enter_sleep_mode(void)
 	HAL_SPI_DMAStop(&hspi1);
 	Tranfcmd();
 	
+  HAL_GPIO_WritePin(POWERSAVE_GPIO_Port, POWERSAVE_Pin, GPIO_PIN_RESET);//开启Powersave
     /*进STOP模式*/
-  __HAL_RCC_PWR_CLK_DISABLE();
-	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-	while(1);
+//  __HAL_RCC_PWR_CLK_DISABLE();
+//	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+//	while(1);
 }
 
-void module_pwr_exit_sleep_mode(void)
-{
-	sleepflag=0;
-  NVIC_SystemReset();           //软件重启
-}
+//void module_pwr_exit_sleep_mode(void)
+//{
+//	sleepflag=0;
+////  NVIC_SystemReset();           //软件重启
+//}
 
 
 u8 key1UpFlag = False;
@@ -328,8 +334,8 @@ void KeyProcess(void)
 //	return;
 	if(short_key1_flag)
 	{
-		short_key1_flag=0;
 		if(Current_Mode==MODE_CHROME) return;
+		short_key1_flag=0;
 		if(!oled.GetTipState()) 
 		{
 			oled.TipStart();
@@ -361,8 +367,8 @@ void KeyProcess(void)
 	}
 	if(short_key2_flag)
 	{
-		short_key2_flag=0;
 		if(Current_Mode==MODE_CHROME) return;
+		short_key2_flag=0;
 		if(!oled.GetTipState()) 
 		{
 			oled.TipStart();
@@ -489,17 +495,21 @@ int main(void)
 			oled.Display_bbmp(160-13-2,-8,13,8,icon_battery[battype]);
 			nm.animotion(ds3231.Time, motiontye, fonttye, 0);
 			nm.gram2one();
-			oled.Display_bbmp(160-13-2-48-4,-8,48,8,onegram);
+			oled.Display_bbmp(160-13-2-48-2,-8,48,8,onegram);
 			oled.Refrash_Screen();
 		}
 		if(Flag_BATRefrash)
-		{
+		{             
 			Flag_BATRefrash = False;
 			while(adcintrun)
 				HAL_Delay(1);
 			FFT_Stop();
 			HAL_Delay(5);
 			GETVOL_Start();
+		}
+		if(sleepcount>120)
+		{
+			module_pwr_enter_sleep_mode();
 		}
 		HAL_Delay(5);
   }
@@ -552,9 +562,6 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 
-uint8_t prt = 2;		
-STA systemstatus = offline;
-u16 offlinecount = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	static u16 TimeRun = 0;
@@ -562,7 +569,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		if(key1_fall_flag==1)//发生按键按下事件
 		{
-			if(!HAL_GPIO_ReadPin(KEY_L_GPIO_Port,KEY_L_Pin))//按键持续按下
+			if(HAL_GPIO_ReadPin(KEY_L_GPIO_Port,KEY_L_Pin))//按键持续按下
 			{         
 				if(key1_holdon_ms <= 200)  
 				{
@@ -614,7 +621,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		
 		if(key2_fall_flag==1)//发生按键按下事件
 		{
-			if(!HAL_GPIO_ReadPin(KEY_R_GPIO_Port,KEY_R_Pin))//按键持续按下
+			if(HAL_GPIO_ReadPin(KEY_R_GPIO_Port,KEY_R_Pin))//按键持续按下
 			{         
 				if(key2_holdon_ms <= 200)  
 				{
@@ -683,6 +690,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if(Display_Mode!=MODE_DATE&&Display_Mode!=MODE_MUSIC)
 				Display_Mode=MODE_DATE;
 		}
+		else
+		{
+			sleepcount++;
+		}
 		Time_Handle();
 		sprintf(fpschar,"%d",fps);
 		fps = 0;
@@ -732,21 +743,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 	switch(GPIO_Pin)
 	{
 		case KEY_L_Pin:
-		if(HAL_GPIO_ReadPin(KEY_L_GPIO_Port,KEY_L_Pin)==GPIO_PIN_RESET)  //LED1翻转
+		if(HAL_GPIO_ReadPin(KEY_L_GPIO_Port,KEY_L_Pin)==GPIO_PIN_SET)  //LED1翻转
 		{
-				if(sleepflag)
-					module_pwr_exit_sleep_mode();
-				else
+			sleepcount=0;
+//				if(sleepflag)
+//					module_pwr_exit_sleep_mode();
+//				else
 					key1_fall_flag = 1;//开启按键标志
 				printf("KeyL Pressed!\r\n"); 
 		}
 		break;
 		case KEY_R_Pin:
-		if(HAL_GPIO_ReadPin(KEY_R_GPIO_Port,KEY_R_Pin)==GPIO_PIN_RESET)  //LED1翻转
+		if(HAL_GPIO_ReadPin(KEY_R_GPIO_Port,KEY_R_Pin)==GPIO_PIN_SET)  //LED1翻转
 		{
-				if(sleepflag)
-					module_pwr_exit_sleep_mode();
-				else
+			sleepcount=0;
+//				if(sleepflag)
+//					module_pwr_exit_sleep_mode();
+//				else
 					key2_fall_flag = 1;//开启按键标志
 				printf("Key2 Pressed!\r\n");  
 		}
@@ -784,7 +797,10 @@ void GetVoltage()
 	                                                                                                                                                                                                                                                                                                               
 	sprintf(battery,"BAT %d %0.2fV %d",symIndex,battVoltage,vol_buf[50]);
 	if(HAL_GPIO_ReadPin(CHGLED_GPIO_Port,CHGLED_Pin)==GPIO_PIN_RESET)
+	{
+		sleepcount=0;
 		battype=4;
+	}
 	else
 	{
 		if(symIndex>=80)

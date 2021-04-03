@@ -372,11 +372,10 @@ void DS3231_Read_Temp(uint8_t *Temp)
 }
 void DS3231_SetUart(void)
 {
-	static int runcount=0;
-	if(!(runcount%600))
+	static int hourflag=0;
+	if(hourflag!=Device_Msg.uarthour)
 	{
-		runcount=0;
-		
+		hourflag=Device_Msg.uarthour;
 		if(Device_Msg.uartday&&Device_Msg.uartmonth&&Device_Msg.uartweek<=7)
 		{
 			DS3231_Init_Buf[0] = HEX2BCD(Device_Msg.uartsecond);//Ãë
@@ -390,7 +389,7 @@ void DS3231_SetUart(void)
 				DS3231_Init_Buf[3] = HEX2BCD(Device_Msg.uartweek & 0x7);//ÐÇÆÚ
 			DS3231_Init_Buf[6] = HEX2BCD(Device_Msg.uartyear - 2000);//Äê
 			DS3231_Time_Init(DS3231_Init_Buf);
-	//		printf("SetOK\r\n");
+			printf("SetOK\r\n");
 		}
 	}
 }
