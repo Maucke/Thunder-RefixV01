@@ -298,12 +298,18 @@ void module_pwr_enter_sleep_mode(void)
 	HAL_ADC_Stop(&hadc1);
 	HAL_SPI_DMAStop(&hspi1);
 	Tranfcmd();
+	HAL_Delay(500);
+	
+  GPIO_InitStruct.Pin = POWERSAVE_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  HAL_GPIO_Init(POWERSAVE_GPIO_Port, &GPIO_InitStruct);
 	
   HAL_GPIO_WritePin(POWERSAVE_GPIO_Port, POWERSAVE_Pin, GPIO_PIN_RESET);//开启Powersave
     /*进STOP模式*/
-//  __HAL_RCC_PWR_CLK_DISABLE();
-//	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
-//	while(1);
+  __HAL_RCC_PWR_CLK_DISABLE();
+	HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_STOPENTRY_WFI);
+	while(1);
 }
 
 //void module_pwr_exit_sleep_mode(void)
@@ -347,6 +353,7 @@ void KeyProcess(void)
 			Device_Cmd.commandstyle++;			
 			if(Device_Cmd.commandstyle>6)
 				Device_Cmd.commandstyle=1;
+			drache_cmd(&huart1,Command_Style,Device_Cmd.commandstyle);
 		}
 		else
 		{
@@ -358,11 +365,19 @@ void KeyProcess(void)
 	else if(key1_long_down)
 	{
 		if(Display_Mode==MODE_MUSIC)
+		{
 			Display_Mode=MODE_CHROME;
+		}
 		else if(Display_Mode==MODE_CHROME)
+		{
 			Display_Mode=MODE_DATE;
+			drache_cmd(&huart1,Command_Mode,2);
+		}
 		else if(Display_Mode==MODE_DATE)
+		{
 			Display_Mode=MODE_MUSIC;
+			drache_cmd(&huart1,Command_Mode,3);
+		}
 		key1_long_down=0;
 	}
 	if(short_key2_flag)
@@ -375,9 +390,32 @@ void KeyProcess(void)
 			return;
 		}
 		oled.TipStart();
-		Device_Cmd.commandmotion++;			
-		if(Device_Cmd.commandmotion>5)
+		if(Device_Cmd.commandmotion==0xf)
 			Device_Cmd.commandmotion=0;
+		else
+		{
+			Device_Cmd.commandmotion++;			
+			if(Device_Cmd.commandmotion>5)
+				Device_Cmd.commandmotion=0xf;
+		}
+			
+		
+		if(Device_Cmd.commandmotion == 0)
+			drache_cmd(&huart1,Command_Motion,0x8);
+		else if(Device_Cmd.commandmotion == 1)
+			drache_cmd(&huart1,Command_Motion,0x4);
+		else if(Device_Cmd.commandmotion == 2)
+			drache_cmd(&huart1,Command_Motion,0x2);
+		else if(Device_Cmd.commandmotion == 3)
+			drache_cmd(&huart1,Command_Motion,0x1);
+		else if(Device_Cmd.commandmotion == 4)
+			drache_cmd(&huart1,Command_Motion,0x20);
+		else if(Device_Cmd.commandmotion == 5)
+			drache_cmd(&huart1,Command_Motion,0x10);
+		else if(Device_Cmd.commandmotion == 6)
+			drache_cmd(&huart1,Command_Motion,0x1);
+		else
+			drache_cmd(&huart1,Command_Motion,0);
 	}
 	else if(key2_long_down)
 	{
@@ -674,7 +712,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	if (htim->Instance == htim5.Instance)
 	{
-		oled.Set_Wheel(TimeRun++%96);
 		oled.Calc_Color();
 		HAL_GPIO_TogglePin(SYSLED_GPIO_Port, SYSLED_Pin);
 		Flag_Refrash = True;
@@ -682,6 +719,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == htim9.Instance)
 	{
 		
+		oled.Set_Wheel(TimeRun++%96);
 		if(offlinecount<3)
 			offlinecount++;
 		else if(systemstatus==online)
