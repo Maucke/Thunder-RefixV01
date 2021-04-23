@@ -176,7 +176,7 @@ void MainSysRun()
 		switch(Current_Mode)
 		{
 			case MODE_GAME:ui.SUIDataPrss();break;
-//			case MODE_NORMAL:ui.NUIDataPrss();break;
+			case MODE_NORMAL:ui.NUIDataPrss();break;
 			case MODE_MUSIC:ui.MUIDataPrss();break;
 			case MODE_DATE:switch(TimeTHEME) 
 			{
@@ -201,7 +201,7 @@ void MainSysRun()
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUI_Out();;break;
-//				case MODE_NORMAL:ui.NUI_Out();break;
+				case MODE_NORMAL:ui.NUI_Out();break;
 				case MODE_MUSIC:FFT_Stop();ui.MUI_Out();HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_RESET);break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
@@ -224,7 +224,7 @@ void MainSysRun()
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUI_In();;break;
-//				case MODE_NORMAL:ui.NUI_In();break;
+				case MODE_NORMAL:ui.NUI_In();break;
 				case MODE_MUSIC:MX_ADC1_Init();FFT_Start();HAL_GPIO_WritePin(MICSHUTDN_GPIO_Port, MICSHUTDN_Pin, GPIO_PIN_SET);//¹Ø±ÕMICui.MUI_In();break;
 				case MODE_DATE:switch(TimeTHEME) 
 				{
@@ -242,6 +242,8 @@ void MainSysRun()
 	}
 }
 
+int motiontye = 0;
+int fonttye = 4;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -344,6 +346,7 @@ void KeyProcess(void)
 		short_key1_flag=0;
 		if(!oled.GetTipState()) 
 		{
+			fonttye=(fonttye+1)%5;
 			oled.TipStart();
 			return;
 		}
@@ -386,6 +389,7 @@ void KeyProcess(void)
 		short_key2_flag=0;
 		if(!oled.GetTipState()) 
 		{
+			motiontye=(motiontye+1)%10;
 			oled.TipStart();
 			return;
 		}
@@ -434,8 +438,6 @@ float getpresent(float voltage)
 float battVoltage;
 int symIndex;
 extern const unsigned char icon_battery[][13];
-int motiontye = 0;
-int fonttye = 4;
 /* USER CODE END 0 */
 
 /**
@@ -500,7 +502,8 @@ int main(void)
 		{
 			Flag_Refrash=False;
 			oled.Clear_Screen();
-			motion.OLED_CustormMotion(Device_Cmd.commandmotion);
+			if(Current_Mode!=MODE_SHOW)
+				motion.OLED_CustormMotion(Device_Cmd.commandmotion);
 			KeyProcess();
 			fps++;
 			if(showfpsflag)
@@ -508,7 +511,7 @@ int main(void)
 			switch(Current_Mode)
 			{
 				case MODE_GAME:ui.SUIMainShow();break;
-	//			case MODE_NORMAL:ui.NUIMainShow();break;
+				case MODE_NORMAL:ui.NUIMainShow();break;
 				case MODE_MUSIC:ui.MUIMainShow();break;
 				case MODE_DATE:
 					
@@ -728,9 +731,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if(Display_Mode!=MODE_DATE&&Display_Mode!=MODE_MUSIC)
 				Display_Mode=MODE_DATE;
 		}
-		else
+		else if(Device_Msg.fft[5]<10)
 		{
 			sleepcount++;
+		}
+		else
+		{
+			sleepcount=0;
 		}
 		Time_Handle();
 		sprintf(fpschar,"%d",fps);

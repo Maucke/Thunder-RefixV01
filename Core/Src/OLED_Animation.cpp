@@ -642,7 +642,7 @@ void OLED_Animation::OLED_AllMotion_Init(void)
 
 void OLED_Animation::OLED_CustormMotion(u8 Channel)
 {
-	if(Display_Mode==MODE_DATE&&Channel==5)
+	if(Current_Mode==MODE_DATE&&Channel==5)
 		Motion_TriangleF();
 	else switch(Channel)
 	{

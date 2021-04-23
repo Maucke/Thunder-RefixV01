@@ -58,8 +58,7 @@ extern "C" {
 		
     private:  
 			OLED_STATUS MtRect(int x,int y,int w,int h,int step,uint16_t color);
-			OLED_STATUS SUITitleShow(int step,uint16_t color);
-			OLED_STATUS SUICornShow(void);
+			OLED_STATUS NUITitleShow(int step,uint16_t color);
 			OLED_STATUS NUICornShow(void);
 			OLED_STATUS TUICornShow(void);
 			void CoordinateDataPrss(int cycle,int height,int width);

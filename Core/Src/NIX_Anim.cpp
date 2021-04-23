@@ -15,7 +15,7 @@ sendString("string", col, row)
 
 NixAnim::NixAnim() {}
 NixAnim::~NixAnim() {}
-const unsigned char Fonts[][91 * 5] =
+const unsigned char Fonts[5][91 * 5] =
 {
 {0x00,0x00,0x00,0x00,0x00,/*" ",0*/
 

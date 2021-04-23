@@ -15,6 +15,224 @@ extern "C"  {
 
 OLED_UI::OLED_UI(void) {
 }
+OLED_STATUS OLED_UI::MtRect(int x,int y,int w,int h,int step,uint16_t color)
+{
+	if(step<=w)
+	{
+		Draw_Line(x,y,x+step,y,color);return OLED_BUSY;
+	}
+	else
+		Draw_Line(x,y,x+w,y,color);
+		
+	if(step>w&&step<=w+h)
+	{
+		Draw_Line(x+w,y,x+w,y+step-w,color);return OLED_BUSY;
+	}
+	else
+		Draw_Line(x+w,y,x+w,y+h,color);
+		
+	if(step>w+h&&step<=2*w+h)
+	{
+		Draw_Line(x+w,y+h,x+w-(step-w-h),y+h,color);return OLED_BUSY;
+	}
+	else
+		Draw_Line(x+w,y+h,x,y+h,color);
+		
+	if(step>2*w+h&&step<=2*w+2*h)
+	{
+		Draw_Line(x,y+h,x,y+h-(step-2*w-h),color);return OLED_BUSY;
+	}
+	else
+		Draw_Line(x,y+h,x,y,color);
+	
+	if(step>2*w+2*h)
+		return OLED_IDLE;
+	else
+		return OLED_BUSY;
+}
+
+OLED_STATUS OLED_UI::NUITitleShow(int step,uint16_t color)
+{
+	if(step>10)
+	{
+		OLED_SHFAny(80+5,42,"0",4,color);
+		OLED_SHFAny(2,6,"0",4,color);
+		OLED_SHFAny(2,68+32,"0",4,color);
+	}
+	if(step>20)
+	{
+		OLED_SHFAny(80+5+9*1,42,"1",4,color);
+		OLED_SHFAny(2+15*1,6,"1",4,color);
+		OLED_SHFAny(15*1,68+32,"1",4,color);
+//		Draw_Line(67,34,68+32,34,color_now);
+//		Draw_Line(67,34,67,35,color_now);
+		Draw_Line(67+16,34,68+16,34,color_now);
+		Draw_Line(67+16,34,67+16,35,color_now);
+	}
+	if(step>30)
+	{
+		OLED_SHFAny(80+5+9*2-1,42,"2",4,color);
+		OLED_SHFAny(2+15*2,6,"2",4,color);
+		OLED_SHFAny(15*2,68+32,"2",4,color);
+	
+	}
+	if(step>40)
+	{
+		OLED_SHFAny(80+5+9*3-1,42,"3",4,color);
+		OLED_SHFAny(2+15*3,6,"3",4,color);
+		OLED_SHFAny(15*3,68+32,"3",4,color);
+	}
+	if(step>50)
+	{
+		OLED_SHFAny(80+5+9*4-1,42,"4",4,color);
+		OLED_SHFAny(2+15*4,6,"4",4,color);
+		OLED_SHFAny(15*4,68+32,"4",4,color);
+		Draw_Line(67+16,58,68+16,58,color_now);
+		Draw_Line(67+16,58,67+16,57,color_now);
+	}
+	if(step>60)
+	{
+		OLED_SHFAny(80+5+9*5-1,42,"5",4,color);
+		OLED_SHFAny(2+15*5,6,"5",4,color);
+		OLED_SHFAny(15*5,68+32,"5",4,color);
+	}
+	if(step>70)
+	{
+		OLED_SHFAny(80+5+9*6-1-1,42,"6",4,color);
+		OLED_SHFAny(2+15*6,6,"6",4,color);
+		OLED_SHFAny(15*6,68+32,"6",4,color);
+	}
+	if(step>80)
+	{
+		OLED_SHFAny(80+5+9*7-1-1,42,"7",4,color);
+		OLED_SHFAny(2+15*7,6,"7",4,color);
+		OLED_SHFAny(15*7,68+32,"7",4,color);
+		Draw_Line(127+32,34,126+32,34,color_now);
+		Draw_Line(127+32,34,127+32,35,color_now);
+	}
+	if(step>90)
+	{
+		OLED_SHFAny(80+5+9*8-1-1,42,"8",4,color);
+		OLED_SHFAny(2+15*8,6,"8",4,color);
+		OLED_SHFAny(15*8,68+32,"8",4,color);
+	}
+	if(step>100)
+	{
+		OLED_SHFAny(2+15*9,6,"9",4,color);
+		OLED_SHFAny(15*9,68+32,"9",4,color);
+	}
+	if(step>110)
+	{
+		OLED_SHFAny(2+15*10-4,6,"10",4,color);
+		OLED_SHFAny(15*10-4,68+32,"10",4,color);
+		Draw_Line(127+32,58,126+32,58,color_now);
+		Draw_Line(127+32,58,127+32,57,color_now);
+		return OLED_IDLE;
+	}
+	else
+		return OLED_BUSY;
+}
+
+extern const unsigned char Corn_SCPU[];
+extern const unsigned char Corn_SGPU[];
+extern const unsigned char Corn_SFANRAM[];
+extern const unsigned char Corn_SRAM[];
+extern const unsigned char Corn_SFAN[];
+extern const unsigned char Corn_SFENQ[];
+extern const unsigned char Corn_STEMP[];
+extern const unsigned char Corn_SSTATE[];
+
+OLED_STATUS OLED_UI::NUICornShow(void)
+{
+		Display_hbmp(80-13,0,13*2,5,Corn_SCPU,color_now,0);
+		
+		Display_hbmp(40-18,34,18*2,5,Corn_SFANRAM,color_now,0);
+		
+		Display_hbmp(120-12,34,12*2,5,Corn_SFAN,color_now,0);
+		
+		Display_hbmp(26-10,62,20,5,Corn_SFENQ,color_now,0);
+		Display_hbmp(80-11,62,22,5,Corn_STEMP,color_now,0);
+		Display_hbmp(134-13,62,13*2,5,Corn_SSTATE,color_now,0);
+		Display_hbmp(80-14,62+32,28,5,Corn_SRAM,color_now,0);
+		return OLED_IDLE;
+}
+
+void OLED_UI::NUI_In()
+{
+	int i;
+	for(i=0;i<20;i++)
+		SetCurrent(i,0);
+	
+	SetTarget(0,314+64+4);
+	SetTarget(1,176+32+4);
+	SetTarget(2,148+22+4);
+	SetTarget(3,320+64+4);
+	SetTarget(4,157);
+	SetTarget(5,14);
+	SetTarget(6,11);
+}
+
+void OLED_UI::NUI_Out()
+{
+	int i;
+	for(i=0;i<20;i++)
+		SetTarget(i,0);
+}
+
+
+void OLED_UI::NUIDataPrss()
+{
+	SetTarget(7,Device_Msg.cpuload*123/1000);
+	
+	SetTarget(9,Device_Msg.cpufan/142);
+	
+	SetTarget(11,Device_Msg.ramload*123/1000);//RAM
+}
+
+OLED_STATUS OLED_UI::NUIMainShow()
+{
+	int i;
+	MtRect(0,0,159,30,pit[0].current,color_now);
+	MtRect(0,34,80,57-33,pit[1].current,color_now);
+	
+	MtRect(0,62,51,95-62-5,pit[2].current,color_now);
+	MtRect(53,62,52,95-62-5,pit[2].current,color_now);
+	MtRect(107,62,51,95-62-5,pit[2].current,color_now);
+	
+//	MtRect(0+128,0,127,30,pit[0].current,color_now);
+//	MtRect(0+128,34,64,57-33,pit[1].current,color_now);
+	MtRect(0,62+32,159,95-62,pit[3].current,color_now);
+	Draw_Line(2,2,pit[4].current,2,color_now);
+	Draw_Line(2,28,pit[4].current,28,color_now);
+//	Draw_Line(2+128,2,pit[4].current+128,2,color_now);
+//	Draw_Line(2+128,28,pit[4].current+128,28,color_now);
+	
+	for(i=0;i<pit[6].current;i++)
+	{
+		Draw_Line(3+15*i,12,3+15*i,12+pit[5].current,color_half);
+		Draw_Line(3+15*i,74+32,3+15*i,74+32+pit[5].current*18/13,color_half);
+	}
+	
+	NUITitleShow(pit[2].current,color_now);
+	NUICornShow();
+	
+	Fill_Rect(2,12,pit[7].current,14,color_half);
+//	Fill_Rect(2+128,12,pit[8].current,14,color_half);
+	
+	Fill_Rect(84,49,pit[9].current,7,color_half);
+	
+	Fill_Rect(2,74+32,pit[11].current,19,color_half);
+	
+	OLED_SHFAny(18,42,Device_NStr.cpufan,10,color_now);
+//	OLED_SHFAny(12+128,42,Device_NStr.gpufan,10,color_now);
+	
+	OLED_SHFAny(26-13,72-1,Device_NStr.gpuclock,13,color_now);
+	OLED_SHFAny(80-13,72-1,Device_NStr.gputemp,13,color_now);
+	OLED_SHFAny(134-13,72-1,Device_NStr.gpuload,13,color_now);
+	return OLED_IDLE;
+}
+
+
 //uint16_t randcolor[100];
 //u8 pointercolor=0;
 void OLED_UI::OLED_LFPixel(int x,int y,int w,int h,int psize,int pinterval,u8 Num,const unsigned char *ch,uint16_t color)
@@ -376,7 +594,7 @@ void OLED_UI::HUIDataPrss(){
 }
 OLED_STATUS OLED_UI::HUIMainShow(){
 	
-	oled.Display_bmp(0-160+pit[50].current,0,128,128,Logo_amd);
+	oled.Display_bmp(0-160+pit[50].current,0,128,128,Logo_msi);
 	
 	return OLED_IDLE;
 }
