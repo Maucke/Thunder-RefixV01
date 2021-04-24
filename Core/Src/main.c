@@ -722,7 +722,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == htim9.Instance)
 	{
 		
-		oled.Set_Wheel(TimeRun++%96);
+		switch(Device_Cmd.commandrgbmode)
+		{
+			case 1:oled.Set_Wheelf(TimeRun%96);break;
+			case 2:oled.Set_Wheel(TimeRun%96);break;
+			case 3:oled.Set_Wheelf(Device_Cmd.commandrgbcolor*96/256);break;
+			default:oled.Set_Wheelf(Device_Cmd.commandrgbcolor*96/256);break;
+		}
 		if(offlinecount<3)
 			offlinecount++;
 		else if(systemstatus==online)
@@ -731,7 +737,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if(Display_Mode!=MODE_DATE&&Display_Mode!=MODE_MUSIC)
 				Display_Mode=MODE_DATE;
 		}
-		else if(Device_Msg.fft[5]<10)
+		else if(Device_Msg.fft[5]<50)
 		{
 			sleepcount++;
 		}

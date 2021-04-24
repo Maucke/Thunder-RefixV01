@@ -177,10 +177,13 @@ void ConvertData(void)
 	if(Device_Msg.cputemp)
 	{
 	sprintf(Device_Str.cputemp,"%02d.%1d$ ",Device_Msg.cputemp/10,Device_Msg.cputemp%10);
-	sprintf(Device_NStr.cputemp,"%02d.%1d",Device_Msg.cputemp/10,Device_Msg.cputemp%10);
+	sprintf(Device_NStr.cputemp,"%02d",Device_Msg.cputemp/10);
 	}
 	if(Device_Msg.cpuclock)
+	{
 	sprintf(Device_Str.cpuclock,"%dMhz ",Device_Msg.cpuclock);
+	sprintf(Device_NStr.cpuclock,"%04d",Device_Msg.cpuclock);
+	}
 	sprintf(Device_Str.cpuload,"%02.1f%%  ",(double)Device_Msg.cpuload/10);
 	if(Device_Msg.cpufan)
 	sprintf(Device_Str.cpufan,"%d",Device_Msg.cpufan);
@@ -193,7 +196,7 @@ void ConvertData(void)
 	if(Device_Msg.gpuclock)
 	{
 	sprintf(Device_Str.gpuclock,"%dMhz ",Device_Msg.gpuclock);
-	sprintf(Device_NStr.gpuclock,"%02d",Device_Msg.gpuclock/100);
+	sprintf(Device_NStr.gpuclock,"%04d",Device_Msg.gpuclock);
 	}
 	sprintf(Device_Str.gpuload,"%02.1f%%  ",(double)Device_Msg.gpuload/10);
 	if(Device_Msg.gpuload<1000)
@@ -204,7 +207,10 @@ void ConvertData(void)
 	sprintf(Device_Str.gpufan,"%d",Device_Msg.gpufan);
 	
 	if(Device_Msg.maintemp)
+	{
 	sprintf(Device_Str.maintemp,"%03.1f$ ",(double)Device_Msg.maintemp/10);
+	sprintf(Device_NStr.maintemp,"%02d",Device_Msg.maintemp/10);
+	}
 	if(Device_Msg.mainfan)
 	sprintf(Device_Str.mainfan,"%dRpm ",Device_Msg.mainfan);
 	

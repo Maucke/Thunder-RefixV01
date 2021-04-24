@@ -51,7 +51,7 @@ OLED_STATUS OLED_UI::MtRect(int x,int y,int w,int h,int step,uint16_t color)
 		return OLED_BUSY;
 }
 
-OLED_STATUS OLED_UI::NUITitleShow(int step,uint16_t color)
+OLED_STATUS OLED_UI::SUITitleShow(int step,uint16_t color)
 {
 	if(step>10)
 	{
@@ -135,29 +135,29 @@ OLED_STATUS OLED_UI::NUITitleShow(int step,uint16_t color)
 
 extern const unsigned char Corn_SCPU[];
 extern const unsigned char Corn_SGPU[];
-extern const unsigned char Corn_SFANRAM[];
+extern const unsigned char Corn_SCPUC[];
 extern const unsigned char Corn_SRAM[];
 extern const unsigned char Corn_SFAN[];
-extern const unsigned char Corn_SFENQ[];
-extern const unsigned char Corn_STEMP[];
-extern const unsigned char Corn_SSTATE[];
+extern const unsigned char Corn_SFENQMHZ[];
+extern const unsigned char Corn_SGPUC[];
+extern const unsigned char Corn_SMAINC[];
 
-OLED_STATUS OLED_UI::NUICornShow(void)
+OLED_STATUS OLED_UI::SUICornShow(void)
 {
 		Display_hbmp(80-13,0,13*2,5,Corn_SCPU,color_now,0);
 		
-		Display_hbmp(40-18,34,18*2,5,Corn_SFANRAM,color_now,0);
+		Display_hbmp(40-20,34,20*2,5,Corn_SFENQMHZ,color_now,0);
 		
 		Display_hbmp(120-12,34,12*2,5,Corn_SFAN,color_now,0);
 		
-		Display_hbmp(26-10,62,20,5,Corn_SFENQ,color_now,0);
-		Display_hbmp(80-11,62,22,5,Corn_STEMP,color_now,0);
-		Display_hbmp(134-13,62,13*2,5,Corn_SSTATE,color_now,0);
+		Display_hbmp(26-13,62,26,5,Corn_SCPUC,color_now,0);
+		Display_hbmp(80-13,62,26,5,Corn_SGPUC,color_now,0);
+		Display_hbmp(134-14,62,28,5,Corn_SMAINC,color_now,0);
 		Display_hbmp(80-14,62+32,28,5,Corn_SRAM,color_now,0);
 		return OLED_IDLE;
 }
 
-void OLED_UI::NUI_In()
+void OLED_UI::SUI_In()
 {
 	int i;
 	for(i=0;i<20;i++)
@@ -172,7 +172,7 @@ void OLED_UI::NUI_In()
 	SetTarget(6,11);
 }
 
-void OLED_UI::NUI_Out()
+void OLED_UI::SUI_Out()
 {
 	int i;
 	for(i=0;i<20;i++)
@@ -180,16 +180,18 @@ void OLED_UI::NUI_Out()
 }
 
 
-void OLED_UI::NUIDataPrss()
+void OLED_UI::SUIDataPrss()
 {
 	SetTarget(7,Device_Msg.cpuload*123/1000);
 	
-	SetTarget(9,Device_Msg.cpufan/142);
-	
+	if(Device_Msg.cpufan)
+		SetTarget(9,Device_Msg.cpufan/142);
+	else
+		SetTarget(9,Device_Msg.gpufan/142);
 	SetTarget(11,Device_Msg.ramload*123/1000);//RAM
 }
 
-OLED_STATUS OLED_UI::NUIMainShow()
+OLED_STATUS OLED_UI::SUIMainShow()
 {
 	int i;
 	MtRect(0,0,159,30,pit[0].current,color_now);
@@ -213,22 +215,24 @@ OLED_STATUS OLED_UI::NUIMainShow()
 		Draw_Line(3+15*i,74+32,3+15*i,74+32+pit[5].current*18/13,color_half);
 	}
 	
-	NUITitleShow(pit[2].current,color_now);
-	NUICornShow();
+	SUITitleShow(pit[2].current,color_now);
+	SUICornShow();
 	
-	Fill_Rect(2,12,pit[7].current,14,color_half);
+	Fill_Rect(2,12,pit[7].current,14,0x9ad6);
 //	Fill_Rect(2+128,12,pit[8].current,14,color_half);
 	
-	Fill_Rect(84,49,pit[9].current,7,color_half);
+	Fill_Rect(84,49,pit[9].current,7,0x9ad6);
 	
-	Fill_Rect(2,74+32,pit[11].current,19,color_half);
-	
-	OLED_SHFAny(18,42,Device_NStr.cpufan,10,color_now);
+	Fill_Rect(2,74+32,pit[11].current,19,0x9ad6);
+	if(Device_Msg.cpuclock)
+		OLED_SHFAny(18,42,Device_NStr.cpuclock,10,0xdebe);
+	else
+		OLED_SHFAny(18,42,Device_NStr.gpuclock,10,0xdebe);
 //	OLED_SHFAny(12+128,42,Device_NStr.gpufan,10,color_now);
 	
-	OLED_SHFAny(26-13,72-1,Device_NStr.gpuclock,13,color_now);
-	OLED_SHFAny(80-13,72-1,Device_NStr.gputemp,13,color_now);
-	OLED_SHFAny(134-13,72-1,Device_NStr.gpuload,13,color_now);
+	OLED_SHFAny(26-13,72-1,Device_NStr.cputemp,13,0xdebe);
+	OLED_SHFAny(80-13,72-1,Device_NStr.gputemp,13,0xdebe);
+	OLED_SHFAny(134-13,72-1,Device_NStr.maintemp,13,0xdebe);
 	return OLED_IDLE;
 }
 
@@ -600,7 +604,7 @@ OLED_STATUS OLED_UI::HUIMainShow(){
 }
 
 
-void OLED_UI::SUI_In(){
+void OLED_UI::NUI_In(){
 	int i;
 	for(i=60;i<70;i++)
 		SetCurrent(i,0);
@@ -624,7 +628,7 @@ void OLED_UI::SUI_In(){
 	SetCurrent(SSDN,112-7+40);
 	SetCurrent(SSRD,5-5);
 }
-void OLED_UI::SUI_Out(){
+void OLED_UI::NUI_Out(){
 	int i;
 	for(i=60;i<70;i++)
 		SetTarget(i,0);
@@ -638,13 +642,13 @@ void OLED_UI::SUI_Out(){
 	SetTarget(SSDN,112-7+40);
 	SetTarget(SSRD,5-5);
 }
-void OLED_UI::SUIDataPrss(){
+void OLED_UI::NUIDataPrss(){
 	
 }
 
 #define DT 16
 extern OLED_Animation motion;
-OLED_STATUS OLED_UI::SUIMainShow(){
+OLED_STATUS OLED_UI::NUIMainShow(){
 	static int i,roun=0;
 	static char tempstr[100];
 	roun++;
