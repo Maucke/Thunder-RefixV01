@@ -633,12 +633,12 @@ void OLED_Driver::OLED_SHFAny(int x,int y,char *ch,int w,uint16_t color)
 		
 		switch(w)
 		{
-			case 4:OLED_HFAny(x,y,4,5,c,Defu_XF4x5,color);break;
-			case 10:OLED_HFAny(x,y,10,13,c,GeForce_10x13,color);break;
-			case 13:OLED_HFAny(x,y,13,16,c,GeForce_13x16,color);break;
-			case 19:OLED_HFAny(x,y,19,23,c,GeForce_19x23,color);break;
-			case 25:OLED_HFAny(x,y,25,37,c,GeForce_25x37,color);break;
-			default:OLED_HFAny(x,y,10,13,c,GeForce_10x13,color);break;
+			case 4:if(c>10)return;OLED_HFAny(x,y,4,5,c,Defu_XF4x5,color);break;
+			case 10:if(c>10)return;OLED_HFAny(x,y,10,13,c,GeForce_10x13,color);break;
+			case 13:if(c>10)return;OLED_HFAny(x,y,13,16,c,GeForce_13x16,color);break;
+			case 19:if(c>11)return;OLED_HFAny(x,y,19,23,c,GeForce_19x23,color);break;
+			case 25:if(c>9)return;OLED_HFAny(x,y,25,37,c,GeForce_25x37,color);break;
+			default:if(c>10)return;OLED_HFAny(x,y,10,13,c,GeForce_10x13,color);break;
 		}
 		x+=w; 
 		j++;
@@ -744,9 +744,9 @@ void OLED_Driver::OLED_NF6x8(int x,int y,u8 Num,u8 Offset)
 		for(j=0;j<3;j++)
 		{
 			if(!(((Font_Default6x8[(Num+Offset)*6+j*2]>>i)&1)<<1))
-				Draw_Pixel(x+j*2,y+i);
+				Draw_Pixel(x+j*2,y+i,0xffff);
 			if(!((Font_Default6x8[(Num+Offset)*6+j*2+1]>>i)&1))
-				Draw_Pixel(x+j*2+1,y+i);
+				Draw_Pixel(x+j*2+1,y+i,0xffff);
 		}
 	}
 }	
@@ -782,6 +782,38 @@ void OLED_Driver::OLED_SNF6x8(int x,int y,char *ch)
 	}
 	for(j=0;j<8;j++)
 		Draw_Pixel(x,y+j);
+}
+
+void OLED_Driver::OLED_SNF6x8(int x,int y,char *ch,uint16_t color)
+{
+	u8 c=0,j=0;
+	for(j=0;j<8;j++)
+		Draw_Pixel(x-1,y+j,color);
+	j = 0;
+	while(ch[j]!='\0')
+	{
+		c=ch[j];
+		if(x<253)
+		{
+			if(c=='$')
+				OLED_NF6x8(x,y,11,0);
+			else if(c=='.')
+				OLED_NF6x8(x,y,10,0);
+			else if(c==':')
+				OLED_NF6x8(x,y,13,0);
+			else if(c=='-')
+				OLED_NF6x8(x,y,12,0);
+			else
+			{
+				c=ch[j]-'0';
+				OLED_NF6x8(x,y,c,0);
+			}
+		}
+		x+=6;
+		j++;
+	}
+	for(j=0;j<8;j++)
+		Draw_Pixel(x,y+j,color);
 }
 #ifdef __cplusplus
 }

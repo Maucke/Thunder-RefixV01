@@ -371,15 +371,15 @@ void KeyProcess(void)
 		{
 			Display_Mode=MODE_CHROME;
 		}
-		else if(Display_Mode==MODE_CHROME)
-		{
-			Display_Mode=MODE_DATE;
-			drache_cmd(&huart1,Command_Mode,2);
-		}
 		else if(Display_Mode==MODE_DATE)
 		{
 			Display_Mode=MODE_MUSIC;
 			drache_cmd(&huart1,Command_Mode,3);
+		}
+		else
+		{
+			Display_Mode=MODE_DATE;
+			drache_cmd(&huart1,Command_Mode,2);
 		}
 		key1_long_down=0;
 	}
@@ -438,6 +438,7 @@ float getpresent(float voltage)
 float battVoltage;
 int symIndex;
 extern const unsigned char icon_battery[][13];
+int watchdog=0;
 /* USER CODE END 0 */
 
 /**
@@ -488,6 +489,7 @@ int main(void)
 	motion.OLED_AllMotion_Init();
 	GETVOL_Start();
 	drache_cmd(&huart1,0xA002,3);
+	InitData();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -513,17 +515,12 @@ int main(void)
 				case MODE_GAME:ui.SUIMainShow();break;
 				case MODE_NORMAL:ui.NUIMainShow();break;
 				case MODE_MUSIC:ui.MUIMainShow();break;
-				case MODE_DATE:
-					
-//				battVoltage=(float)Get_Adc(ADC_CHANNEL_1) / 4095.0f * 3.57f * 2;
-//				symIndex = getpresent(battVoltage);
-				switch(TimeTHEME) 
+				case MODE_DATE:switch(TimeTHEME) 
 				{
 					case 0:ui.TUIMainShow();break;
 					case 1:ui.T1UIMainShow();break;
 					case 2:ui.T2UIMainShow();break;
 					default:Device_Cmd.commandtimetheme=0;break;
-	//				case 2:ui.T2UIMainShow();break;
 				}
 				break;
 				case MODE_SHOW:ui.HUIMainShow();break;
@@ -553,6 +550,7 @@ int main(void)
 			module_pwr_enter_sleep_mode();
 		}
 		HAL_Delay(5);
+		watchdog=0;
   }
   /* USER CODE END 3 */
 }
@@ -573,11 +571,12 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
   RCC_OscInitStruct.PLL.PLLN = 168;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV4;
   RCC_OscInitStruct.PLL.PLLQ = 4;
@@ -721,11 +720,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 	if (htim->Instance == htim9.Instance)
 	{
-		
+		if(watchdog++>10)
+			NVIC_SystemReset();
 		switch(Device_Cmd.commandrgbmode)
 		{
-			case 1:oled.Set_Wheelf(TimeRun%96);break;
-			case 2:oled.Set_Wheel(TimeRun%96);break;
+			case 1:oled.Set_Wheelf(TimeRun++%96);break;
+			case 2:oled.Set_Wheel(TimeRun++%96);break;
 			case 3:oled.Set_Wheelf(Device_Cmd.commandrgbcolor*96/256);break;
 			default:oled.Set_Wheelf(Device_Cmd.commandrgbcolor*96/256);break;
 		}

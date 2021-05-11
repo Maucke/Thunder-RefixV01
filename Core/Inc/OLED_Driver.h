@@ -121,6 +121,7 @@ extern "C" {
 			void Set_Wheelf(uint16_t WheelPos);
 			
 			void OLED_SNF6x8(int x,int y,char *ch);
+			void OLED_SNF6x8(int x,int y,char *ch,uint16_t color);
 			void Clear_FpsCount(void);
 			void OLED_HFAny(int x,int y,int w,int h,uint8_t Num,const unsigned char *ch,uint16_t color);
 			void OLED_SHFAny(int x,int y,char *ch,int w,uint16_t color);

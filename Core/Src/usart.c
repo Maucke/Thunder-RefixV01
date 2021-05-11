@@ -258,6 +258,7 @@ void InitData(void)
 	
 	sprintf(Device_NStr.cputemp,"--");	
 	sprintf(Device_NStr.gputemp,"--");	
+	sprintf(Device_NStr.maintemp,"--");	
 	sprintf(Device_NStr.cpuclock,"----");	
 	sprintf(Device_NStr.gpufan,"----");	
 	sprintf(Device_NStr.cpufan,"----");	
@@ -470,8 +471,6 @@ void SendCommand(void)
 		HAL_UART_Transmit(&huart1,Buf,Buf[4]+5,0xffff);
 }
 
-u8 SaveFlag = False;
-
 void AnalysisCommand(uint8_t *Buf)
 {
 //	uint16_t Temp;
@@ -506,51 +505,51 @@ void AnalysisCommand(uint8_t *Buf)
 							Device_Cmd.commandmotion = 5;
 						else if(MAKEWORD(Buf[6],Buf[5])&1)
 							Device_Cmd.commandmotion = 6;
+						else
+							Device_Cmd.commandmotion = 7;
 						
-						
-						SaveFlag = True;
 					}break;
 				case Command_Style:
 					if(Device_Cmd.commandstyle != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandstyle = MAKEWORD(Buf[6],Buf[5]);
-//						SaveFlag = True;
+//						
 					}break;
 				case Command_Speed:
 					if(Device_Cmd.commandspeed != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandspeed = MAKEWORD(Buf[6],Buf[5]);
-//						SaveFlag = True;
+//						
 					}break;
 				case Command_Brightness:
 					if(Device_Cmd.commandbrightness != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandbrightness = MAKEWORD(Buf[6],Buf[5]);
-//						SaveFlag = True;
+//						
 					}break;
 				case Command_Set:
 					if(Device_Cmd.commandset != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandset = MAKEWORD(Buf[6],Buf[5]);
-						SaveFlag = True;
+						
 					}break;
 				case Command_RGBMode:
 					if(Device_Cmd.commandrgbmode != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandrgbmode = MAKEWORD(Buf[6],Buf[5]);
-						SaveFlag = True;
+						
 					}break;
 				case Command_RGBBrightness:
 					if(Device_Cmd.commandrgbbrightness != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandrgbbrightness = MAKEWORD(Buf[6],Buf[5]);
-						SaveFlag = True;
+						
 					}break;
 				case Command_RGBColor:
 					if(Device_Cmd.commandrgbcolor != MAKEWORD(Buf[6],Buf[5]))
 					{
 						Device_Cmd.commandrgbcolor = MAKEWORD(Buf[6],Buf[5]);
-						SaveFlag = True;
+						
 					}break;
 				case Command_TOPTHEME:
 					if(Device_Cmd.commandtoptheme != MAKEWORD(Buf[6],Buf[5]))
@@ -560,7 +559,7 @@ void AnalysisCommand(uint8_t *Buf)
 							printf("Current top %d\r\n",Device_Cmd.commandtoptheme);
 						else
 							printf("Current top 1\r\n");
-						SaveFlag = True;
+						
 					}break;
 				case Command_LOGOTHEME:
 					if(Device_Cmd.commandlogotheme != MAKEWORD(Buf[6],Buf[5]))
@@ -570,7 +569,7 @@ void AnalysisCommand(uint8_t *Buf)
 							printf("Current logo %d\r\n",Device_Cmd.commandlogotheme);
 						else
 							printf("Current logo 5\r\n");
-						SaveFlag = True;
+						
 					}break;
 				case Command_GAMETYPE:
 					if(Device_Cmd.commandgametype != MAKEWORD(Buf[6],Buf[5]))
@@ -583,14 +582,16 @@ void AnalysisCommand(uint8_t *Buf)
 							Device_Cmd.commandgametype=0xF;
 							printf("Mode Auto\r\n");
 						}
-						SaveFlag = True;
+						
 					}break;
 				case Command_DEVICENAME:
 					memset(&Device_Name,0,sizeof(Device_Name));
 				
 					for(i=0;i<Buf[4];i++) Device_Name[i] = Buf[i + 5];
-					SaveFlag = True;
+					
 					break;
+				case 0xFFFF:
+					NVIC_SystemReset();break;
 			}
 		}
 	}
@@ -813,7 +814,6 @@ int drache_printf(UART_HandleTypeDef *huart,const char *pcFormat, ...)
 	HAL_UART_Transmit(huart,buf,len+5, 0xffff);
 	return len; 
 }
-
 
 void drache_clear(UART_HandleTypeDef *huart)
 {

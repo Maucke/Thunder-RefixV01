@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-#define PITITEM 80
+#define PITITEM 100
 typedef struct
 {
 	float target;

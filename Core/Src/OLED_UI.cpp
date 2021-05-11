@@ -152,7 +152,7 @@ OLED_STATUS OLED_UI::SUICornShow(void)
 		
 		Display_hbmp(26-13,62,26,5,Corn_SCPUC,color_now,0);
 		Display_hbmp(80-13,62,26,5,Corn_SGPUC,color_now,0);
-		Display_hbmp(134-14,62,28,5,Corn_SMAINC,color_now,0);
+		Display_hbmp(134-15,62,30,5,Corn_SMAINC,color_now,0);
 		Display_hbmp(80-14,62+32,28,5,Corn_SRAM,color_now,0);
 		return OLED_IDLE;
 }
@@ -160,70 +160,70 @@ OLED_STATUS OLED_UI::SUICornShow(void)
 void OLED_UI::SUI_In()
 {
 	int i;
-	for(i=0;i<20;i++)
+	for(i=80;i<80+20;i++)
 		SetCurrent(i,0);
 	
-	SetTarget(0,314+64+4);
-	SetTarget(1,176+32+4);
-	SetTarget(2,148+22+4);
-	SetTarget(3,320+64+4);
-	SetTarget(4,157);
-	SetTarget(5,14);
-	SetTarget(6,11);
+	SetTarget(80+0,314+64+4);
+	SetTarget(80+1,176+32+4);
+	SetTarget(80+2,148+22+4);
+	SetTarget(80+3,320+64+4);
+	SetTarget(80+4,157);
+	SetTarget(80+5,14);
+	SetTarget(80+6,11);
 }
 
 void OLED_UI::SUI_Out()
 {
 	int i;
-	for(i=0;i<20;i++)
+	for(i=80+0;i<80+20;i++)
 		SetTarget(i,0);
 }
 
 
 void OLED_UI::SUIDataPrss()
 {
-	SetTarget(7,Device_Msg.cpuload*123/1000);
+	SetTarget(80+7,Device_Msg.cpuload*123/1000);
 	
 	if(Device_Msg.cpufan)
-		SetTarget(9,Device_Msg.cpufan/142);
+		SetTarget(80+9,Device_Msg.cpufan/142);
 	else
-		SetTarget(9,Device_Msg.gpufan/142);
-	SetTarget(11,Device_Msg.ramload*123/1000);//RAM
+		SetTarget(80+9,Device_Msg.gpufan/142);
+	SetTarget(80+11,Device_Msg.ramload*123/1000);//RAM
 }
 
 OLED_STATUS OLED_UI::SUIMainShow()
 {
 	int i;
-	MtRect(0,0,159,30,pit[0].current,color_now);
-	MtRect(0,34,80,57-33,pit[1].current,color_now);
+	MtRect(0,0,159,30,pit[80+0].current,color_now);
+	MtRect(0,34,80,57-33,pit[80+1].current,color_now);
 	
-	MtRect(0,62,51,95-62-5,pit[2].current,color_now);
-	MtRect(53,62,52,95-62-5,pit[2].current,color_now);
-	MtRect(107,62,51,95-62-5,pit[2].current,color_now);
+	MtRect(0,62,51,95-62-5,pit[80+2].current,color_now);
+	MtRect(53,62,52,95-62-5,pit[80+2].current,color_now);
+	MtRect(107,62,51,95-62-5,pit[80+2].current,color_now);
 	
-//	MtRect(0+128,0,127,30,pit[0].current,color_now);
-//	MtRect(0+128,34,64,57-33,pit[1].current,color_now);
-	MtRect(0,62+32,159,95-62,pit[3].current,color_now);
-	Draw_Line(2,2,pit[4].current,2,color_now);
-	Draw_Line(2,28,pit[4].current,28,color_now);
-//	Draw_Line(2+128,2,pit[4].current+128,2,color_now);
-//	Draw_Line(2+128,28,pit[4].current+128,28,color_now);
+//	MtRect(0+128,0,127,30,pit[80+0].current,color_now);
+//	MtRect(0+128,34,64,57-33,pit[80+1].current,color_now);
+	MtRect(0,62+32,159,95-62,pit[80+3].current,color_now);
+	Draw_Line(2,2,pit[80+4].current,2,color_now);
+	Draw_Line(2,28,pit[80+4].current,28,color_now);
+//	Draw_Line(2+128,2,pit[80+4].current+128,2,color_now);
+//	Draw_Line(2+128,28,pit[80+4].current+128,28,color_now);
 	
-	for(i=0;i<pit[6].current;i++)
+	for(i=0;i<pit[80+6].current;i++)
 	{
-		Draw_Line(3+15*i,12,3+15*i,12+pit[5].current,color_half);
-		Draw_Line(3+15*i,74+32,3+15*i,74+32+pit[5].current*18/13,color_half);
+		Draw_Line(3+15*i,12,3+15*i,12+pit[80+5].current,color_half);
+		Draw_Line(3+15*i,74+32,3+15*i,74+32+pit[80+5].current*18/13,color_half);
 	}
 	
-	SUITitleShow(pit[2].current,color_now);
+	SUITitleShow(pit[80+2].current,color_now);
 	SUICornShow();
 	
-	Fill_Rect(2,12,pit[7].current,14,0x9ad6);
-//	Fill_Rect(2+128,12,pit[8].current,14,color_half);
+	Fill_Rect(2,12,pit[80+7].current,pit[80+5].current,0x7ad6);
+//	Fill_Rect(2+128,12,pit[80+8].current,14,color_half);
 	
-	Fill_Rect(84,49,pit[9].current,7,0x9ad6);
+	Fill_Rect(84,49,pit[80+9].current,7,0x7ad6);
 	
-	Fill_Rect(2,74+32,pit[11].current,19,0x9ad6);
+	Fill_Rect(2,74+32,pit[80+11].current,pit[80+5].current*18/13,0x7ad6);
 	if(Device_Msg.cpuclock)
 		OLED_SHFAny(18,42,Device_NStr.cpuclock,10,0xdebe);
 	else
@@ -249,6 +249,7 @@ void OLED_UI::OLED_LFPixel(int x,int y,int w,int h,int psize,int pinterval,u8 Nu
 				if((ch[Num*bnum+w*k+j]>>i)&1)
 				{
 					Fill_Rect(x+j*(psize+pinterval),y+i*(psize+pinterval)+k*8*(psize+pinterval),psize,psize,color);
+					Draw_Rect(x+j*(psize+pinterval)-1,y+i*(psize+pinterval)+k*8*(psize+pinterval)-1,psize+2,psize+2,0xffff);
 				}
 }
 //	randcolor[(Num*bnum+w*k+j)*8+i]
@@ -302,7 +303,7 @@ void OLED_UI::TUIDataPrss(){
 }
 OLED_STATUS OLED_UI::TUIMainShow(){
 	OLED_SLFAny(pit[40].current-128,-10+pit[42].current,4,2,ds3231.Hour,8,~color_now);
-	OLED_SLFAny(128+pit[41].current+74,55+pit[42].current,3,2,ds3231.Min,8,color_now);
+	OLED_SLFAny(126+pit[41].current+74,55+pit[42].current,3,2,ds3231.Min,8,color_now);
 	return OLED_IDLE;}
 
 void OLED_UI::T1UI_In(){
@@ -402,10 +403,10 @@ OLED_STATUS OLED_UI::T1UIMainShow(){
 		else
 			oled.Draw_Line((OCX+(pit[RDRadius].current*cos((i*6+pit[RDRuleDelaut].current)*PI/180))),(OCY+(pit[RDRadius].current*sin((i*6+pit[RDRuleDelaut].current)*PI/180))),(OCX+(pit[RDRadiusC].current*cos((i*6+pit[RDRuleDelaut].current)*PI/180))),(OCY+(pit[RDRadiusC].current*sin((i*6+pit[RDRuleDelaut].current)*PI/180))),color_min);
 	}
-	oled.Draw_Circle(OCX,OCY,pit[RDRadius].current+2,color_half);
-	oled.Draw_Circle(OCX,OCY,pit[RDRadius].current);
+	oled.Draw_Circle(OCX,OCY,pit[RDRadius].current+2);
+	oled.Draw_Circle(OCX,OCY,pit[RDRadius].current,0xdebe);
 
-	oled.OLED_SNF6x8(pit[PNTTIME].current,60,ds3231.Timens);
+	oled.OLED_SNF6x8(pit[PNTTIME].current,60,ds3231.Timens,0xdebe);
 	
 	oled.Draw_Line((OCX+(pit[RDHourRadius].current*cos(pit[PNTHOUR].current*PI/180))),(OCY+(pit[RDHourRadius].current*sin(pit[PNTHOUR].current*PI/180))),OCX,OCY,2,pit[RDHourColor].target);
 	oled.Draw_Line((OCX+(pit[RDMinRadius].current*cos(pit[PNTMIN].current*PI/180))),(OCY+(pit[RDMinRadius].current*sin(pit[PNTMIN].current*PI/180))),OCX,OCY,pit[RDMinColor].target);
@@ -415,7 +416,7 @@ OLED_STATUS OLED_UI::T1UIMainShow(){
 	if(pit[RDHourRadius].current>5)
 	{
 		oled.Fill_Circle(OCX,OCY,3,0);
-		oled.Draw_Circle(OCX,OCY,1);
+		oled.Draw_Circle(OCX,OCY,1,0xdebe);
 		oled.Draw_Circle(OCX,OCY,3,color_half);
 	}
 	return OLED_IDLE;}
@@ -502,26 +503,26 @@ void OLED_UI::T2UIDataPrss(){
 	}
 }
 OLED_STATUS OLED_UI::T2UIMainShow(){
-	oled.Draw_Circle(OCX+RLV+14,OCY+RLV,pit[RDRadiusA].current,1,color_now);
-	oled.Draw_Circle(OCX+RLV+14,OCY+RLV,pit[RDRadiusA].current+2,1,color_half); //右下
+	oled.Draw_Circle(OCX+RLV+14,OCY+RLV,pit[RDRadiusA].current,1,0xdebe);
+	oled.Draw_Circle(OCX+RLV+14,OCY+RLV,pit[RDRadiusA].current+2,1,color_now); //右下
 	
-	oled.Draw_Circle(OCX-RLV-14,OCY+RLV,pit[RDRadiusA].current,2,color_now);
-	oled.Draw_Circle(OCX-RLV-14,OCY+RLV,(pit[RDRadiusA].current+2),2,color_half);	//左下
+	oled.Draw_Circle(OCX-RLV-14,OCY+RLV,pit[RDRadiusA].current,2,0xdebe);
+	oled.Draw_Circle(OCX-RLV-14,OCY+RLV,(pit[RDRadiusA].current+2),2,color_now);	//左下
 	
-	oled.Draw_Circle(OCX-RLV-14,OCY-RLV,pit[RDRadiusA].current,4,color_now);
-	oled.Draw_Circle(OCX-RLV-14,OCY-RLV,(pit[RDRadiusA].current+2),4,color_half); //左上
+	oled.Draw_Circle(OCX-RLV-14,OCY-RLV,pit[RDRadiusA].current,4,0xdebe);
+	oled.Draw_Circle(OCX-RLV-14,OCY-RLV,(pit[RDRadiusA].current+2),4,color_now); //左上
 	
-	oled.Draw_Circle(OCX+RLV+14,OCY-RLV,pit[RDRadiusA].current,3,color_now);
-	oled.Draw_Circle(OCX+RLV+14,OCY-RLV,(pit[RDRadiusA].current+2),3,color_half); //右上
+	oled.Draw_Circle(OCX+RLV+14,OCY-RLV,pit[RDRadiusA].current,3,0xdebe);
+	oled.Draw_Circle(OCX+RLV+14,OCY-RLV,(pit[RDRadiusA].current+2),3,color_now); //右上
 	
-	oled.Draw_Line(OCX+RLV+14+pit[RDRadiusA].current,OCY+RLV,OCX+RLV+pit[RDRadiusA].current+14,OCY-RLV,color_now);//右侧引导线
-	oled.Draw_Line(OCX+RLV+14+(pit[RDRadiusA].current+2),OCY+RLV,OCX+RLV+(pit[RDRadiusA].current+2)+14,OCY-RLV,color_half);//右侧引导线
+	oled.Draw_Line(OCX+RLV+14+pit[RDRadiusA].current,OCY+RLV,OCX+RLV+pit[RDRadiusA].current+14,OCY-RLV,0xdebe);//右侧引导线
+	oled.Draw_Line(OCX+RLV+14+(pit[RDRadiusA].current+2),OCY+RLV,OCX+RLV+(pit[RDRadiusA].current+2)+14,OCY-RLV);//右侧引导线
 	
-	oled.Draw_Line(OCX-RLV-14-pit[RDRadiusA].current,OCY+RLV,OCX-RLV-pit[RDRadiusA].current-14,OCY-RLV,color_now);//左侧引导线
-	oled.Draw_Line(OCX-RLV-14-(pit[RDRadiusA].current+2),OCY+RLV,OCX-RLV-(pit[RDRadiusA].current+2)-14,OCY-RLV,color_half);//左侧引导线
+	oled.Draw_Line(OCX-RLV-14-pit[RDRadiusA].current,OCY+RLV,OCX-RLV-pit[RDRadiusA].current-14,OCY-RLV,0xdebe);//左侧引导线
+	oled.Draw_Line(OCX-RLV-14-(pit[RDRadiusA].current+2),OCY+RLV,OCX-RLV-(pit[RDRadiusA].current+2)-14,OCY-RLV);//左侧引导线
 
-	oled.OLED_SNF6x8(pit[PNTTIME].current,60,ds3231.Timens);
-	oled.Draw_Line(pit[PNTTIME].current-1,60+9,pit[PNTTIME].current+30,60+9,color_half);
+	oled.OLED_SNF6x8(pit[PNTTIME].current,60,ds3231.Timens,0xdebe);
+	oled.Draw_Line(pit[PNTTIME].current-1,60+9,pit[PNTTIME].current+30,60+9,color_now);
 	
 	oled.Draw_Line((OCX+(pit[RDHourRadius].current*cos(pit[PNTHOUR].current*PI/180))),(OCY+(pit[RDHourRadius].current*sin(pit[PNTHOUR].current*PI/180))),OCX,OCY,2,pit[RDHourColor].target);
 	oled.Draw_Line((OCX+(pit[RDMinRadius].current*cos(pit[PNTMIN].current*PI/180))),(OCY+(pit[RDMinRadius].current*sin(pit[PNTMIN].current*PI/180))),OCX,OCY,pit[RDMinColor].target);
@@ -531,7 +532,7 @@ OLED_STATUS OLED_UI::T2UIMainShow(){
 	if(pit[RDHourRadius].current>5)
 	{
 		oled.Fill_Circle(OCX,OCY,3,0);
-		oled.Draw_Circle(OCX,OCY,1);
+		oled.Draw_Circle(OCX,OCY,1,0xdebe);
 		oled.Draw_Circle(OCX,OCY,3,color_half);
 	}
 	return OLED_IDLE;}
